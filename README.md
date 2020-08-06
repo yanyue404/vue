@@ -8,10 +8,13 @@ Vue (pronounced `/vjuː/`, like view) is a **progressive framework** for buildin
 
 ## Project Structure
 
-- `packages`: 包含构建相关的文件，一般情况下我们不需要动
+- `scripts`: 包含构建相关的文件，一般情况下我们不需要动
+  - `alias.js`: 别名配置
+  - `config.js`: 生成 rollup 配置的文件
 - `dist`: 构建后文件的输出目录
 - `examples`: 存放一些使用 Vue 开发的应用案例
 - `flow`: 类型声明，使用开源项目 [Flow](https://flowtype.org/)
+- `packages`: 存放独立发布的包的目录
 - `test`: 包含所有测试文件
 - `src`: 这个是我们最应该关注的目录，包含了源码
   - `core`: 存放通用的，平台无关的代码
@@ -22,6 +25,7 @@ Vue (pronounced `/vjuː/`, like view) is a **progressive framework** for buildin
     - `components`: 包含抽象出来的通用组件
   - `server`: 包含服务端渲染(server-side rendering)的相关代码
   - `platforms`: 包含平台特有的相关代码
+    - `web/entry-runtime.js`: 运行时版本，不包含模板(template)到 render 函数的编译器，所以不支持 `template` 选项
     - `web/entry-runtime-with-compiler.js`: 独立构建版本的入口，输出 dist/vue.js，它包含模板(template)到 render 函数的编译器
     - `web/entry-compiler.js`: vue-template-compiler 包的入口文件
   - `sfc`: 包含单文件组件(.vue 文件)的解析逻辑，用于 vue-template-compiler 包

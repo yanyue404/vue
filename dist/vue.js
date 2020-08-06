@@ -4957,7 +4957,7 @@
 
   var uid$3 = 0;
 
-  function initMixin (Vue) {
+  function initMixin(Vue) {
     Vue.prototype._init = function (options) {
       var vm = this;
       // a uid
@@ -4992,14 +4992,14 @@
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
+      initLifecycle(vm); // $partent,$root,$children
+      initEvents(vm); // 事件监听初始化 $on,$emit,$off
       initRender(vm);
-      callHook(vm, 'beforeCreate');
+      callHook(vm, "beforeCreate");
       initInjections(vm); // resolve injections before data/props
       initState(vm);
       initProvide(vm); // resolve provide after data/props
-      callHook(vm, 'created');
+      callHook(vm, "created");
 
       /* istanbul ignore if */
       if (config.performance && mark) {
@@ -5014,8 +5014,11 @@
     };
   }
 
-  function initInternalComponent (vm, options) {
-    var opts = vm.$options = Object.create(vm.constructor.options);
+  function initInternalComponent(
+    vm,
+    options
+  ) {
+    var opts = (vm.$options = Object.create(vm.constructor.options));
     // doing this because it's faster than dynamic enumeration.
     var parentVnode = options._parentVnode;
     opts.parent = options.parent;
@@ -5033,7 +5036,7 @@
     }
   }
 
-  function resolveConstructorOptions (Ctor) {
+  function resolveConstructorOptions(Ctor) {
     var options = Ctor.options;
     if (Ctor.super) {
       var superOptions = resolveConstructorOptions(Ctor.super);
@@ -5054,10 +5057,10 @@
         }
       }
     }
-    return options
+    return options;
   }
 
-  function resolveModifiedOptions (Ctor) {
+  function resolveModifiedOptions(Ctor) {
     var modified;
     var latest = Ctor.options;
     var sealed = Ctor.sealedOptions;
@@ -5067,22 +5070,21 @@
         modified[key] = latest[key];
       }
     }
-    return modified
+    return modified;
   }
 
-  function Vue (options) {
-    if (!(this instanceof Vue)
-    ) {
-      warn('Vue is a constructor and should be called with the `new` keyword');
+  function Vue(options) {
+    if (!(this instanceof Vue)) {
+      warn("Vue is a constructor and should be called with the `new` keyword");
     }
     this._init(options);
   }
 
-  initMixin(Vue);
-  stateMixin(Vue);
-  eventsMixin(Vue);
-  lifecycleMixin(Vue);
-  renderMixin(Vue);
+  initMixin(Vue); // _init，_uid，$options 当前 Vue 实例的初始化选项，注意：这是经过 mergeOptions() 后的
+  stateMixin(Vue); // $data, $props 设为只读属性，继续添加 $set, $delete, $watch
+  eventsMixin(Vue); // $on, $emit, $off, $once
+  lifecycleMixin(Vue); // _update, $forceUpdate, $destroy
+  renderMixin(Vue); // installRenderHelpers 函数中的方法，$nextTick，_render
 
   /*  */
 
@@ -5375,18 +5377,18 @@
 
   /*  */
 
-  function initGlobalAPI (Vue) {
+  function initGlobalAPI(Vue) {
     // config
     var configDef = {};
     configDef.get = function () { return config; };
     {
       configDef.set = function () {
         warn(
-          'Do not replace the Vue.config object, set individual fields instead.'
+          "Do not replace the Vue.config object, set individual fields instead."
         );
       };
     }
-    Object.defineProperty(Vue, 'config', configDef);
+    Object.defineProperty(Vue, "config", configDef);
 
     // exposed util methods.
     // NOTE: these are not considered part of the public API - avoid relying on
@@ -5395,7 +5397,7 @@
       warn: warn,
       extend: extend,
       mergeOptions: mergeOptions,
-      defineReactive: defineReactive$$1
+      defineReactive: defineReactive$$1,
     };
 
     Vue.set = set;
@@ -5405,12 +5407,11 @@
     // 2.6 explicit observable API
     Vue.observable = function (obj) {
       observe(obj);
-      return obj
+      return obj;
     };
-
     Vue.options = Object.create(null);
     ASSET_TYPES.forEach(function (type) {
-      Vue.options[type + 's'] = Object.create(null);
+      Vue.options[type + "s"] = Object.create(null);
     });
 
     // this is used to identify the "base" constructor to extend all plain-object
@@ -5418,32 +5419,34 @@
     Vue.options._base = Vue;
 
     extend(Vue.options.components, builtInComponents);
-
     initUse(Vue);
     initMixin$1(Vue);
     initExtend(Vue);
     initAssetRegisters(Vue);
   }
 
+  // 从 Vue 的出生文件导入 Vue
+
+  // 扩展 {... config,set,delete,nextTick,options,use,mixin,extend,component,directive,filter}
   initGlobalAPI(Vue);
 
-  Object.defineProperty(Vue.prototype, '$isServer', {
-    get: isServerRendering
+  Object.defineProperty(Vue.prototype, "$isServer", {
+    get: isServerRendering,
   });
 
-  Object.defineProperty(Vue.prototype, '$ssrContext', {
-    get: function get () {
+  Object.defineProperty(Vue.prototype, "$ssrContext", {
+    get: function get() {
       /* istanbul ignore next */
-      return this.$vnode && this.$vnode.ssrContext
-    }
+      return this.$vnode && this.$vnode.ssrContext;
+    },
   });
 
   // expose FunctionalRenderContext for ssr runtime helper installation
-  Object.defineProperty(Vue, 'FunctionalRenderContext', {
-    value: FunctionalRenderContext
+  Object.defineProperty(Vue, "FunctionalRenderContext", {
+    value: FunctionalRenderContext,
   });
 
-  Vue.version = '2.6.10';
+  Vue.version = "2.6.10";
 
   /*  */
 
@@ -11871,10 +11874,11 @@
 
   var idToTemplate = cached(function (id) {
     var el = query(id);
-    return el && el.innerHTML
+    return el && el.innerHTML;
   });
 
   var mount = Vue.prototype.$mount;
+  // 重写Vue.prototype.$mount 方法
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -11884,9 +11888,9 @@
     /* istanbul ignore if */
     if (el === document.body || el === document.documentElement) {
       warn(
-        "Do not mount Vue to <html> or <body> - mount to normal elements instead."
-      );
-      return this
+          "Do not mount Vue to <html> or <body> - mount to normal elements instead."
+        );
+      return this;
     }
 
     var options = this.$options;
@@ -11894,8 +11898,8 @@
     if (!options.render) {
       var template = options.template;
       if (template) {
-        if (typeof template === 'string') {
-          if (template.charAt(0) === '#') {
+        if (typeof template === "string") {
+          if (template.charAt(0) === "#") {
             template = idToTemplate(template);
             /* istanbul ignore if */
             if (!template) {
@@ -11909,9 +11913,9 @@
           template = template.innerHTML;
         } else {
           {
-            warn('invalid template option:' + template, this);
+            warn("invalid template option:" + template, this);
           }
-          return this
+          return this;
         }
       } else if (el) {
         template = getOuterHTML(el);
@@ -11919,16 +11923,20 @@
       if (template) {
         /* istanbul ignore if */
         if (config.performance && mark) {
-          mark('compile');
+          mark("compile");
         }
 
-        var ref = compileToFunctions(template, {
-          outputSourceRange: "development" !== 'production',
-          shouldDecodeNewlines: shouldDecodeNewlines,
-          shouldDecodeNewlinesForHref: shouldDecodeNewlinesForHref,
-          delimiters: options.delimiters,
-          comments: options.comments
-        }, this);
+        var ref = compileToFunctions(
+          template,
+          {
+            outputSourceRange: "development" !== "production",
+            shouldDecodeNewlines: shouldDecodeNewlines,
+            shouldDecodeNewlinesForHref: shouldDecodeNewlinesForHref,
+            delimiters: options.delimiters,
+            comments: options.comments,
+          },
+          this
+        );
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
         options.render = render;
@@ -11936,28 +11944,28 @@
 
         /* istanbul ignore if */
         if (config.performance && mark) {
-          mark('compile end');
-          measure(("vue " + (this._name) + " compile"), 'compile', 'compile end');
+          mark("compile end");
+          measure(("vue " + (this._name) + " compile"), "compile", "compile end");
         }
       }
     }
-    return mount.call(this, el, hydrating)
+    return mount.call(this, el, hydrating);
   };
 
   /**
    * Get outerHTML of elements, taking care
    * of SVG elements in IE as well.
    */
-  function getOuterHTML (el) {
+  function getOuterHTML(el) {
     if (el.outerHTML) {
-      return el.outerHTML
+      return el.outerHTML;
     } else {
-      var container = document.createElement('div');
+      var container = document.createElement("div");
       container.appendChild(el.cloneNode(true));
-      return container.innerHTML
+      return container.innerHTML;
     }
   }
-
+  // 新增
   Vue.compile = compileToFunctions;
 
   return Vue;
