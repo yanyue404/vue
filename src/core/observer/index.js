@@ -139,6 +139,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 创建 Dep 实例，这个下面的 Dep 上的 depend 会用到
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -157,9 +158,11 @@ export function defineReactive (
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
+    // get 拦截对 obj[key] 的读取操作
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
+        // 依赖收集，在 dep 中添加 watcher，也在 watcher 中添加 dep
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
@@ -170,6 +173,7 @@ export function defineReactive (
       }
       return value
     },
+    // set 拦截对 obj[key] 的设置操作
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */

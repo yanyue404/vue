@@ -20,6 +20,7 @@ export default class Dep {
     this.subs = []
   }
 
+  // 在 dep 中增加 watcher
   addSub (sub: Watcher) {
     this.subs.push(sub)
   }
@@ -27,9 +28,12 @@ export default class Dep {
   removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
-
+  // Dep.target 是 pushTarget(watcher) 是赋值的，值就是 watcher
+  // 向 watcher 中增加 dep （这里互有绑定对方）
+  // 把观察者放到被观察者里面去
   depend () {
     if (Dep.target) {
+      // Dep.target.addDep 就是 Watcher.prototype.addDep 只不过 this 是 Dep 的实例
       Dep.target.addDep(this)
     }
   }

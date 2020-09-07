@@ -49,13 +49,13 @@ export function initMixin(Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm;
-    initLifecycle(vm); // $partent,$root,$children
-    initEvents(vm); // 事件监听初始化 $on,$emit,$off
-    initRender(vm);
+    initLifecycle(vm); // vm.$partent,$root,$children,$refs
+    initEvents(vm); // vm._events, updateComponentListeners(vm, listeners)
+    initRender(vm); // vm.$slots，$scopedSlots，$createElement
     callHook(vm, "beforeCreate");
     initInjections(vm); // resolve injections before data/props
-    initState(vm);
-    initProvide(vm); // resolve provide after data/props
+    initState(vm); // 初始化 _props methods _data _computedWatchers（computed） watch
+    initProvide(vm); // _provided（resolve provide after data/props）
     callHook(vm, "created");
 
     /* istanbul ignore if */

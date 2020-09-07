@@ -4,10 +4,12 @@ export const emptyObject = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
+// 判断给定变量是否是未定义
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+// 判断给定变量是否已定义
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
@@ -22,6 +24,7 @@ export function isFalse (v: any): boolean %checks {
 
 /**
  * Check if value is primitive.
+ * 判断给定变量是否是原始类型值
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -47,6 +50,7 @@ export function isObject (obj: mixed): boolean %checks {
  */
 const _toString = Object.prototype.toString
 
+// 返回给定变量的原始类型字符串
 export function toRawType (value: any): string {
   return _toString.call(value).slice(8, -1)
 }
@@ -54,6 +58,7 @@ export function toRawType (value: any): string {
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
+ * 判断给定变量是否是纯对象
  */
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
@@ -129,6 +134,7 @@ export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 /**
  * Remove an item from an array.
+ * 从数组中移除指定元素
  */
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
@@ -141,6 +147,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 
 /**
  * Check whether an object has the property.
+ * 检查对象 obj 是否具有属性值key
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
@@ -160,7 +167,7 @@ export function cached<F: Function> (fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
- * 横线转驼峰
+ * 连字符转驼峰
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
@@ -169,6 +176,7 @@ export const camelize = cached((str: string): string => {
 
 /**
  * Capitalize a string.
+ * 首字母大写
  */
 export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -176,6 +184,7 @@ export const capitalize = cached((str: string): string => {
 
 /**
  * Hyphenate a camelCase string.
+ * 驼峰转连字符
  */
 const hyphenateRE = /\B([A-Z])/g
 export const hyphenate = cached((str: string): string => {
@@ -215,6 +224,7 @@ export const bind = Function.prototype.bind
 
 /**
  * Convert an Array-like object to a real Array.
+ * 将类数组对象转换为数组
  */
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
@@ -228,6 +238,7 @@ export function toArray (list: any, start?: number): Array<any> {
 
 /**
  * Mix properties into target object.
+ * 将 _from 对象的属性混合到 to 对象中
  */
 export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {
@@ -238,6 +249,7 @@ export function extend (to: Object, _from: ?Object): Object {
 
 /**
  * Merge an Array of Objects into a single Object.
+ * 将一个数组合并到一个对象中，并返回该对象
  */
 export function toObject (arr: Array<any>): Object {
   const res = {}
@@ -282,6 +294,7 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
 /**
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
+ * 检查两个值是否相等
  */
 export function looseEqual (a: any, b: any): boolean {
   if (a === b) return true
@@ -322,6 +335,7 @@ export function looseEqual (a: any, b: any): boolean {
  * Return the first index at which a loosely equal value can be
  * found in the array (if value is a plain object, the array must
  * contain an object of the same shape), or -1 if it is not present.
+ * 返回 val 在 arr 中的索引
  */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
@@ -332,6 +346,7 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
 
 /**
  * Ensure a function is called only once.
+ * 只调用一次的函数
  */
 export function once (fn: Function): Function {
   let called = false

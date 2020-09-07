@@ -18,9 +18,9 @@ Vue (pronounced `/vjuː/`, like view) is a **progressive framework** for buildin
 - `test`: 包含所有测试文件
 - `src`: 这个是我们最应该关注的目录，包含了源码
   - `core`: 存放通用的，平台无关的代码
-    - `observer`: 反应系统，包含数据观测的核心代码
+    - `observer`: 响应系统，包含数据观测的核心代码
     - `vdom`: 包含虚拟 DOM 创建(creation)和打补丁(patching)的代码
-    - `instance`: 包含 Vue 构造函数设计相关的代码
+    - `instance`: 包含 Vue 构造函数涉及相关的代码
     - `global-api`: 包含给 Vue 构造函数挂载全局方法(静态方法)或属性的代码
     - `components`: 包含抽象出来的通用组件
   - `server`: 包含服务端渲染(server-side rendering)的相关代码
@@ -44,6 +44,8 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 - [HcySunYang](https://github.com/HcySunYang)
   - [Vue2.1.7 源码学习](http://hcysun.me/2017/03/03/Vue%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0)
   - [vue-design](https://github.com/HcySunYang/vue-design/tree/elegant)
+- [抽丝剥茧带你复习vue源码（2023年面试版本）](https://juejin.cn/post/7195517440344211512)
+- [浅曦 vue 源码](https://juejin.cn/column/7054724545126596615)
 
 ## Others
 

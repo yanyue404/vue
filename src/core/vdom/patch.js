@@ -141,19 +141,26 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // 这个  createComponent 负责处理 vnode 是自定义组件的情况
+    // 如果是 vnode 是一个普通元素，createComponent 调用后返回 false
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+      // 如果 vnode 是自定义组件，createComponent 执行后返回 true，到这里就终止了
+      // TODO: 自定义组件的渲染过程先略过
       return
     }
 
+    // 能走到这里说明 vnode 是个普通的元素
     const data = vnode.data
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
+      // 未知标签
       if (process.env.NODE_ENV !== 'production') {
         if (data && data.pre) {
           creatingElmInVPre++
         }
         if (isUnknownElement(vnode, creatingElmInVPre)) {
+          // 不知名的标签警告
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +
@@ -163,6 +170,8 @@ export function createPatchFunction (backend) {
         }
       }
 
+      // 创建新节点，并挂载到 vnode 对象上，
+      // vnode.elm 是个真实的 DOM 元素
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode)
@@ -188,10 +197,17 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
+        // 递归创建所有子节点（普通元素，组件）
         createChildren(vnode, children, insertedVnodeQueue)
         if (isDef(data)) {
+          // 调用 createHooks
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
+
+        // 初次渲染时将节点插入父节点，这是至关重要的一步了，
+        // vnode.elm 是创建出来的真实元素，到了这里包含所有模板内容的一整棵 DOM 树，
+        // parentElm 是 body 元素
+        // 把 DOM 元素插入到 body，实现渲染
         insert(parentElm, vnode.elm, refElm)
       }
 
@@ -199,14 +215,19 @@ export function createPatchFunction (backend) {
         creatingElmInVPre--
       }
     } else if (isTrue(vnode.isComment)) {
+      // vnode.tag 属性不存在，即不是元素或者自定义组件
+      // 到这里就是注释节点，创建注释节点并插入父节点
       vnode.elm = nodeOps.createComment(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     } else {
+      // 不是注释、也不是元素，就当文本处理了
+      // 文本节点，创建文本节点并插入父节点
       vnode.elm = nodeOps.createTextNode(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     }
   }
 
+  // 创建自定义组件
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
@@ -358,14 +379,20 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 从 vnodes 列表中，从移除索引位于 [startIdx, endIdx] 这个闭区间内的所有节点
   function removeVnodes (vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       const ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
+          // 如果有标签名，说明是元素
+          // 在移除前会调用 createPatchFunction 时接收到的 modules 
+          // 中的 remove 和 destroy 钩子方法处理各个功能模块对应的 remove 和 destroy 逻辑
+          // 比如说 $ref 是需要在节点移除的时候移除调用该节点的 ref 引用，
+          // 所以 ref 模块就导出了一个 destroy 方法
           removeAndInvokeRemoveHook(ch)
           invokeDestroyHook(ch)
-        } else { // Text node
+        } else { // 移除文本节点
           removeNode(ch.elm)
         }
       }
@@ -573,9 +600,14 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // queue, 接收的 insertedVnodeQueue 队列
+  // initial  是否初次渲染
+  // 调用组件的 data.hook 上的 insert 钩子。data.hook 是前面创建组件的 vnode 的时候执行 installComponentHooks 方法为 data.hook 上添加的四个钩子：init、prepatch、insert、destroy；
+  // 这里就是调用 insert 钩子了 https://juejin.cn/post/7073618573297451038
   function invokeInsertHook (vnode, queue, initial) {
     // delay insert hooks for component root nodes, invoke them after the
     // element is really inserted
+    // 对于组件根节点，推迟它的 insert 钩子调用，当他们被插入到文档中之后再调用
     if (isTrue(initial) && isDef(vnode.parent)) {
       vnode.parent.data.pendingInsert = queue
     } else {
@@ -697,7 +729,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // patch 函数用于将 VNode 变成真正的 DOM，渲染到页面上，这个过程涵盖了两种情况
+  // 第一种就是初次渲染，另一种就是响应式数据发生变化视图随之更新
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    // 如果新节点不存在，老节点存在，调用 destroy 销毁老节点
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
@@ -708,15 +743,27 @@ export function createPatchFunction (backend) {
 
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
+      // 新的 VNode 存在，旧的 VNode 不存在，
+      // 说明这种情况下是一个【组件】初次渲染，比如：
+      // <div id='app'> <some-com></some-com> </div>  中的 some-com 的初次渲染走这里
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
+      // 根实例的 patch，从顶层 div#app 的初次渲染在这里
+      // 上面的 if 是这个 else 的后面渲染到自定义组件后的一个分支流程
+
+      // 判断 oldVnode 是否是真实元素，
+      // 初次渲染时，oldVnode 是传递的 div#app 这个真是的 DOM 元素
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
+        // 不是真实元素，但是旧节点和新节点是同一个节点，
+        // 说明是更新阶段，执行 patchVnode 进行更新
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
+        // 是真实节点，则表示初次渲染
         if (isRealElement) {
+          // 挂载到真实元素以及处理服务端渲染情况
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
@@ -740,14 +787,19 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
+          // 走到这里说明不是服务端渲染，则根据 oldVnode 创建一个空 vnode 节点
+          // 执行过这一行后，oldVnode 不再是 div#app 这个真是的 DOM 了，而是一个空的 VNode 了
           oldVnode = emptyNodeAt(oldVnode)
         }
 
         // replacing existing element
+        // 替换掉旧节点的真实元素
         const oldElm = oldVnode.elm
+        // 获取旧节点的父元素，即 body
         const parentElm = nodeOps.parentNode(oldElm)
 
         // create new node
+        // 用新 vnode 创建整棵 DOM 树并插入到 body 元素
         createElm(
           vnode,
           insertedVnodeQueue,
@@ -789,6 +841,9 @@ export function createPatchFunction (backend) {
         }
 
         // destroy old node
+        // 移除旧节点，所谓旧节点就是我们在 test.html 中的模板语法，即
+        // <div id="app"> <some-com></some-com> <div> 
+        // 这个 html 在渲染后就被 Vue 真实的 DOM 替换掉了，所以需要这一段模板代码要移除掉
         if (isDef(parentElm)) {
           removeVnodes([oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
@@ -796,7 +851,8 @@ export function createPatchFunction (backend) {
         }
       }
     }
-
+    
+    // 触发 insertHook   
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }
