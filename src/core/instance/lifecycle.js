@@ -138,6 +138,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 真实的渲染方法
 export function mountComponent (
   vm: Component,
   el: ?Element,

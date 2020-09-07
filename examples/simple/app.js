@@ -5,4 +5,10 @@ new Vue({
   data: {
     test: 1,
   },
+  created() {
+    console.log(this);
+  },
+  mounted() {
+    console.dir(document.getElementById("app"));
+  },
 });

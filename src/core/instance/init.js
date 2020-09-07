@@ -54,8 +54,8 @@ export function initMixin(Vue: Class<Component>) {
     initRender(vm);
     callHook(vm, "beforeCreate");
     initInjections(vm); // resolve injections before data/props
-    initState(vm);
-    initProvide(vm); // resolve provide after data/props
+    initState(vm); // 初始化 _props methods _data _computedWatchers（computed） watch
+    initProvide(vm); // _provided（resolve provide after data/props）
     callHook(vm, "created");
 
     /* istanbul ignore if */
