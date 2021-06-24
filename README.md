@@ -43,7 +43,7 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 
 - [HcySunYang](https://github.com/HcySunYang)
   - [Vue2.1.7 源码学习](http://hcysun.me/2017/03/03/Vue%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0)
-  - [vue-design](https://github.com/HcySunYang/vue-design/tree/elegant)
+  - [vue-design](https://github.com/HcySunYang/vue-design/tree/elegant) http://caibaojian.com/vue-design/art/
 
 ## Others
 
