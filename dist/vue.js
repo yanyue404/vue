@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.10
- * (c) 2014-2020 Evan You
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -15,10 +15,12 @@
 
   // These helpers produce better VM code in JS engines due to their
   // explicitness and function inlining.
+  // 判断给定变量是否是未定义
   function isUndef (v) {
     return v === undefined || v === null
   }
 
+  // 判断给定变量是否已定义
   function isDef (v) {
     return v !== undefined && v !== null
   }
@@ -33,6 +35,7 @@
 
   /**
    * Check if value is primitive.
+   * 判断给定变量是否是原始类型值
    */
   function isPrimitive (value) {
     return (
@@ -58,6 +61,7 @@
    */
   var _toString = Object.prototype.toString;
 
+  // 返回给定变量的原始类型字符串
   function toRawType (value) {
     return _toString.call(value).slice(8, -1)
   }
@@ -65,6 +69,7 @@
   /**
    * Strict object type check. Only returns true
    * for plain JavaScript objects.
+   * 判断给定变量是否是纯对象
    */
   function isPlainObject (obj) {
     return _toString.call(obj) === '[object Object]'
@@ -140,6 +145,7 @@
 
   /**
    * Remove an item from an array.
+   * 从数组中移除指定元素
    */
   function remove (arr, item) {
     if (arr.length) {
@@ -152,6 +158,7 @@
 
   /**
    * Check whether an object has the property.
+   * 检查对象 obj 是否具有属性值key
    */
   var hasOwnProperty = Object.prototype.hasOwnProperty;
   function hasOwn (obj, key) {
@@ -171,6 +178,7 @@
 
   /**
    * Camelize a hyphen-delimited string.
+   * 连字符转驼峰
    */
   var camelizeRE = /-(\w)/g;
   var camelize = cached(function (str) {
@@ -179,6 +187,7 @@
 
   /**
    * Capitalize a string.
+   * 首字母大写
    */
   var capitalize = cached(function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1)
@@ -186,6 +195,7 @@
 
   /**
    * Hyphenate a camelCase string.
+   * 驼峰转连字符
    */
   var hyphenateRE = /\B([A-Z])/g;
   var hyphenate = cached(function (str) {
@@ -225,6 +235,7 @@
 
   /**
    * Convert an Array-like object to a real Array.
+   * 将类数组对象转换为数组
    */
   function toArray (list, start) {
     start = start || 0;
@@ -238,6 +249,7 @@
 
   /**
    * Mix properties into target object.
+   * 将 _from 对象的属性混合到 to 对象中
    */
   function extend (to, _from) {
     for (var key in _from) {
@@ -248,6 +260,7 @@
 
   /**
    * Merge an Array of Objects into a single Object.
+   * 将一个数组合并到一个对象中，并返回该对象
    */
   function toObject (arr) {
     var res = {};
@@ -292,6 +305,7 @@
   /**
    * Check if two values are loosely equal - that is,
    * if they are plain objects, do they have the same shape?
+   * 检查两个值是否相等
    */
   function looseEqual (a, b) {
     if (a === b) { return true }
@@ -332,6 +346,7 @@
    * Return the first index at which a loosely equal value can be
    * found in the array (if value is a plain object, the array must
    * contain an object of the same shape), or -1 if it is not present.
+   * 返回 val 在 arr 中的索引
    */
   function looseIndexOf (arr, val) {
     for (var i = 0; i < arr.length; i++) {
@@ -342,6 +357,7 @@
 
   /**
    * Ensure a function is called only once.
+   * 只调用一次的函数
    */
   function once (fn) {
     var called = false;
@@ -1169,28 +1185,26 @@
       if (!vm) {
         warn(
           "option \"" + key + "\" can only be used during instance " +
-          'creation with the `new` keyword.'
+            "creation with the `new` keyword."
         );
       }
-      return defaultStrat(parent, child)
+      return defaultStrat(parent, child);
     };
   }
 
   /**
    * Helper that recursively merges two data objects together.
    */
-  function mergeData (to, from) {
-    if (!from) { return to }
+  function mergeData(to, from) {
+    if (!from) { return to; }
     var key, toVal, fromVal;
 
-    var keys = hasSymbol
-      ? Reflect.ownKeys(from)
-      : Object.keys(from);
+    var keys = hasSymbol ? Reflect.ownKeys(from) : Object.keys(from);
 
     for (var i = 0; i < keys.length; i++) {
       key = keys[i];
       // in case the object is already observed...
-      if (key === '__ob__') { continue }
+      if (key === "__ob__") { continue; }
       toVal = to[key];
       fromVal = from[key];
       if (!hasOwn(to, key)) {
@@ -1203,13 +1217,13 @@
         mergeData(toVal, fromVal);
       }
     }
-    return to
+    return to;
   }
 
   /**
    * Data
    */
-  function mergeDataOrFn (
+  function mergeDataOrFn(
     parentVal,
     childVal,
     vm
@@ -1217,37 +1231,35 @@
     if (!vm) {
       // in a Vue.extend merge, both should be functions
       if (!childVal) {
-        return parentVal
+        return parentVal;
       }
       if (!parentVal) {
-        return childVal
+        return childVal;
       }
       // when parentVal & childVal are both present,
       // we need to return a function that returns the
       // merged result of both functions... no need to
       // check if parentVal is a function here because
       // it has to be a function to pass previous merges.
-      return function mergedDataFn () {
+      return function mergedDataFn() {
         return mergeData(
-          typeof childVal === 'function' ? childVal.call(this, this) : childVal,
-          typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
-        )
-      }
+          typeof childVal === "function" ? childVal.call(this, this) : childVal,
+          typeof parentVal === "function" ? parentVal.call(this, this) : parentVal
+        );
+      };
     } else {
-      return function mergedInstanceDataFn () {
+      return function mergedInstanceDataFn() {
         // instance merge
-        var instanceData = typeof childVal === 'function'
-          ? childVal.call(vm, vm)
-          : childVal;
-        var defaultData = typeof parentVal === 'function'
-          ? parentVal.call(vm, vm)
-          : parentVal;
+        var instanceData =
+          typeof childVal === "function" ? childVal.call(vm, vm) : childVal;
+        var defaultData =
+          typeof parentVal === "function" ? parentVal.call(vm, vm) : parentVal;
         if (instanceData) {
-          return mergeData(instanceData, defaultData)
+          return mergeData(instanceData, defaultData);
         } else {
-          return defaultData
+          return defaultData;
         }
-      }
+      };
     }
   }
 
@@ -1257,26 +1269,26 @@
     vm
   ) {
     if (!vm) {
-      if (childVal && typeof childVal !== 'function') {
+      if (childVal && typeof childVal !== "function") {
         warn(
-          'The "data" option should be a function ' +
-          'that returns a per-instance value in component ' +
-          'definitions.',
-          vm
-        );
+            'The "data" option should be a function ' +
+              "that returns a per-instance value in component " +
+              "definitions.",
+            vm
+          );
 
-        return parentVal
+        return parentVal;
       }
-      return mergeDataOrFn(parentVal, childVal)
+      return mergeDataOrFn(parentVal, childVal);
     }
 
-    return mergeDataOrFn(parentVal, childVal, vm)
+    return mergeDataOrFn(parentVal, childVal, vm);
   };
 
   /**
    * Hooks and props are merged as arrays.
    */
-  function mergeHook (
+  function mergeHook(
     parentVal,
     childVal
   ) {
@@ -1284,22 +1296,20 @@
       ? parentVal
         ? parentVal.concat(childVal)
         : Array.isArray(childVal)
-          ? childVal
-          : [childVal]
+        ? childVal
+        : [childVal]
       : parentVal;
-    return res
-      ? dedupeHooks(res)
-      : res
+    return res ? dedupeHooks(res) : res;
   }
 
-  function dedupeHooks (hooks) {
+  function dedupeHooks(hooks) {
     var res = [];
     for (var i = 0; i < hooks.length; i++) {
       if (res.indexOf(hooks[i]) === -1) {
         res.push(hooks[i]);
       }
     }
-    return res
+    return res;
   }
 
   LIFECYCLE_HOOKS.forEach(function (hook) {
@@ -1313,7 +1323,7 @@
    * a three-way merge between constructor options, instance
    * options and parent options.
    */
-  function mergeAssets (
+  function mergeAssets(
     parentVal,
     childVal,
     vm,
@@ -1322,14 +1332,14 @@
     var res = Object.create(parentVal || null);
     if (childVal) {
       assertObjectType(key, childVal, vm);
-      return extend(res, childVal)
+      return extend(res, childVal);
     } else {
-      return res
+      return res;
     }
   }
 
   ASSET_TYPES.forEach(function (type) {
-    strats[type + 's'] = mergeAssets;
+    strats[type + "s"] = mergeAssets;
   });
 
   /**
@@ -1348,11 +1358,11 @@
     if (parentVal === nativeWatch) { parentVal = undefined; }
     if (childVal === nativeWatch) { childVal = undefined; }
     /* istanbul ignore if */
-    if (!childVal) { return Object.create(parentVal || null) }
+    if (!childVal) { return Object.create(parentVal || null); }
     {
       assertObjectType(key, childVal, vm);
     }
-    if (!parentVal) { return childVal }
+    if (!parentVal) { return childVal; }
     var ret = {};
     extend(ret, parentVal);
     for (var key$1 in childVal) {
@@ -1363,31 +1373,30 @@
       }
       ret[key$1] = parent
         ? parent.concat(child)
-        : Array.isArray(child) ? child : [child];
+        : Array.isArray(child)
+        ? child
+        : [child];
     }
-    return ret
+    return ret;
   };
 
   /**
    * Other object hashes.
    */
-  strats.props =
-  strats.methods =
-  strats.inject =
-  strats.computed = function (
+  strats.props = strats.methods = strats.inject = strats.computed = function (
     parentVal,
     childVal,
     vm,
     key
   ) {
-    if (childVal && "development" !== 'production') {
+    if (childVal && "development" !== "production") {
       assertObjectType(key, childVal, vm);
     }
-    if (!parentVal) { return childVal }
+    if (!parentVal) { return childVal; }
     var ret = Object.create(null);
     extend(ret, parentVal);
     if (childVal) { extend(ret, childVal); }
-    return ret
+    return ret;
   };
   strats.provide = mergeDataOrFn;
 
@@ -1395,31 +1404,34 @@
    * Default strategy.
    */
   var defaultStrat = function (parentVal, childVal) {
-    return childVal === undefined
-      ? parentVal
-      : childVal
+    return childVal === undefined ? parentVal : childVal;
   };
 
   /**
    * Validate component names
    */
-  function checkComponents (options) {
+  function checkComponents(options) {
     for (var key in options.components) {
       validateComponentName(key);
     }
   }
 
-  function validateComponentName (name) {
-    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
+  function validateComponentName(name) {
+    if (
+      !new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)
+    ) {
       warn(
-        'Invalid component name: "' + name + '". Component names ' +
-        'should conform to valid custom element name in html5 specification.'
+        'Invalid component name: "' +
+          name +
+          '". Component names ' +
+          "should conform to valid custom element name in html5 specification."
       );
     }
     if (isBuiltInTag(name) || config.isReservedTag(name)) {
       warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + name
+        "Do not use built-in or reserved HTML elements as component " +
+          "id: " +
+          name
       );
     }
   }
@@ -1428,34 +1440,33 @@
    * Ensure all props option syntax are normalized into the
    * Object-based format.
    */
-  function normalizeProps (options, vm) {
+  function normalizeProps(options, vm) {
     var props = options.props;
-    if (!props) { return }
+    if (!props) { return; }
     var res = {};
     var i, val, name;
     if (Array.isArray(props)) {
       i = props.length;
       while (i--) {
         val = props[i];
-        if (typeof val === 'string') {
+        // 规范化 props: ["someData"] => props: {someData:{type: null}}
+        if (typeof val === "string") {
           name = camelize(val);
           res[name] = { type: null };
         } else {
-          warn('props must be strings when using array syntax.');
+          warn("props must be strings when using array syntax.");
         }
       }
     } else if (isPlainObject(props)) {
       for (var key in props) {
         val = props[key];
         name = camelize(key);
-        res[name] = isPlainObject(val)
-          ? val
-          : { type: val };
+        res[name] = isPlainObject(val) ? val : { type: val };
       }
     } else {
       warn(
         "Invalid value for option \"props\": expected an Array or an Object, " +
-        "but got " + (toRawType(props)) + ".",
+          "but got " + (toRawType(props)) + ".",
         vm
       );
     }
@@ -1465,10 +1476,11 @@
   /**
    * Normalize all injections into Object-based format
    */
-  function normalizeInject (options, vm) {
+  function normalizeInject(options, vm) {
     var inject = options.inject;
-    if (!inject) { return }
-    var normalized = options.inject = {};
+    if (!inject) { return; }
+    var normalized = (options.inject = {});
+    // ['data1', 'data2'] => {'data1': { from: 'data1' }, 'data2': { from: 'data2' }}
     if (Array.isArray(inject)) {
       for (var i = 0; i < inject.length; i++) {
         normalized[inject[i]] = { from: inject[i] };
@@ -1483,7 +1495,7 @@
     } else {
       warn(
         "Invalid value for option \"inject\": expected an Array or an Object, " +
-        "but got " + (toRawType(inject)) + ".",
+          "but got " + (toRawType(inject)) + ".",
         vm
       );
     }
@@ -1492,45 +1504,46 @@
   /**
    * Normalize raw function directives into object format.
    */
-  function normalizeDirectives (options) {
+  function normalizeDirectives(options) {
     var dirs = options.directives;
     if (dirs) {
       for (var key in dirs) {
         var def$$1 = dirs[key];
-        if (typeof def$$1 === 'function') {
+        if (typeof def$$1 === "function") {
           dirs[key] = { bind: def$$1, update: def$$1 };
         }
       }
     }
   }
 
-  function assertObjectType (name, value, vm) {
+  function assertObjectType(name, value, vm) {
     if (!isPlainObject(value)) {
       warn(
         "Invalid value for option \"" + name + "\": expected an Object, " +
-        "but got " + (toRawType(value)) + ".",
+          "but got " + (toRawType(value)) + ".",
         vm
       );
     }
   }
 
   /**
-   * Merge two option objects into a new one.
-   * Core utility used in both instantiation and inheritance.
+   * 合并两个选项对象为一个新的对象
+   * 这个函数在实例化和继承的时候都有用到
    */
-  function mergeOptions (
+  function mergeOptions(
     parent,
     child,
     vm
   ) {
     {
+      // 检查组件名称是否符合要求
       checkComponents(child);
     }
-
-    if (typeof child === 'function') {
+    // 允许合并另一个实例构造者的选项
+    if (typeof child === "function") {
       child = child.options;
     }
-
+    // 规范化 props
     normalizeProps(child, vm);
     normalizeInject(child, vm);
     normalizeDirectives(child);
@@ -1539,6 +1552,7 @@
     // but only if it is a raw options object that isn't
     // the result of another mergeOptions call.
     // Only merged options has the _base property.
+    // 实例子元素 extends and mixins 加入 merge
     if (!child._base) {
       if (child.extends) {
         parent = mergeOptions(parent, child.extends, vm);
@@ -1560,11 +1574,11 @@
         mergeField(key);
       }
     }
-    function mergeField (key) {
+    function mergeField(key) {
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
     }
-    return options
+    return options;
   }
 
   /**
@@ -1572,32 +1586,29 @@
    * This function is used because child instances need access
    * to assets defined in its ancestor chain.
    */
-  function resolveAsset (
+  function resolveAsset(
     options,
     type,
     id,
     warnMissing
   ) {
     /* istanbul ignore if */
-    if (typeof id !== 'string') {
-      return
+    if (typeof id !== "string") {
+      return;
     }
     var assets = options[type];
     // check local registration variations first
-    if (hasOwn(assets, id)) { return assets[id] }
+    if (hasOwn(assets, id)) { return assets[id]; }
     var camelizedId = camelize(id);
-    if (hasOwn(assets, camelizedId)) { return assets[camelizedId] }
+    if (hasOwn(assets, camelizedId)) { return assets[camelizedId]; }
     var PascalCaseId = capitalize(camelizedId);
-    if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
+    if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId]; }
     // fallback to prototype chain
     var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
     if (warnMissing && !res) {
-      warn(
-        'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
-        options
-      );
+      warn("Failed to resolve " + type.slice(0, -1) + ": " + id, options);
     }
-    return res
+    return res;
   }
 
   /*  */
@@ -4015,6 +4026,7 @@
     };
   }
 
+  // 真实的渲染方法
   function mountComponent (
     vm,
     el,
@@ -4994,11 +5006,11 @@
       vm._self = vm;
       initLifecycle(vm); // $partent,$root,$children
       initEvents(vm); // 事件监听初始化 $on,$emit,$off
-      initRender(vm);
+      initRender(vm); // $slots,$createElement
       callHook(vm, "beforeCreate");
       initInjections(vm); // resolve injections before data/props
-      initState(vm);
-      initProvide(vm); // resolve provide after data/props
+      initState(vm); // ! 初始化组件各种状态（data, methods, props, computed, watch） _props methods _data _computedWatchers（computed） watch
+      initProvide(vm); // _provided（resolve provide after data/props）
       callHook(vm, "created");
 
       /* istanbul ignore if */
@@ -11876,7 +11888,7 @@
     var el = query(id);
     return el && el.innerHTML;
   });
-
+  // web 公共的 $mount
   var mount = Vue.prototype.$mount;
   // 重写Vue.prototype.$mount 方法
   Vue.prototype.$mount = function (
@@ -11925,7 +11937,7 @@
         if (config.performance && mark) {
           mark("compile");
         }
-
+        // ! 模板编译成 渲染函数
         var ref = compileToFunctions(
           template,
           {

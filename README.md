@@ -6,6 +6,19 @@ v2.6.10
 
 Vue (pronounced `/vjuː/`, like view) is a **progressive framework** for building user interfaces.
 
+## build
+
+```bash
+# 安装依赖
+npm install
+
+# 安装打包工具
+npm install rollup -g
+
+# 执⾏打包 (修改examples 引用打包结果 vue.js)
+npm run dev
+```
+
 ## Project Structure
 
 - `scripts`: 包含构建相关的文件，一般情况下我们不需要动
@@ -26,8 +39,9 @@ Vue (pronounced `/vjuː/`, like view) is a **progressive framework** for buildin
   - `server`: 包含服务端渲染(server-side rendering)的相关代码
   - `platforms`: 包含平台特有的相关代码
     - `web/entry-runtime.js`: 运行时版本，不包含模板(template)到 render 函数的编译器，所以不支持 `template` 选项
-    - `web/entry-runtime-with-compiler.js`: 独立构建版本的入口，输出 dist/vue.js，它包含模板(template)到 render 函数的编译器
+    - `web/entry-runtime-with-compiler.js`: 独立构建版本的入口，输出 dist/vue.js，它包含模板(template)到 render 函数的编译器 (入口文件)
     - `web/entry-compiler.js`: vue-template-compiler 包的入口文件
+    - `runtime/index.js` 编译入口使用的 Vue
   - `sfc`: 包含单文件组件(.vue 文件)的解析逻辑，用于 vue-template-compiler 包
   - `shared`: 包含整个代码库通用的代码
 
