@@ -3,10 +3,22 @@
 new Vue({
   el: "#app",
   data: {
-    test: 1,
+    key: "Vue！",
+    parentMessage: "Parent",
+    items: [{ message: "Foo" }, { message: "Bar" }],
+    count: 0,
   },
-  created() {
-    console.log(this);
+  computed: {
+    text() {
+      return "hello, " + this.key;
+    },
+  },
+  methods: {
+    handleClick() {
+      for (let i = 0; i < 1000; i++) {
+        this.count++;
+      }
+    },
   },
   mounted() {
     console.dir(document.getElementById("app"));

@@ -35,7 +35,7 @@ export default class Watcher {
   dirty: boolean;
   active: boolean;
   deps: Array<Dep>;
-  newDeps: Array<Dep>;
+  newDeps: Array<Dep>; 
   depIds: SimpleSet;
   newDepIds: SimpleSet;
   before: ?Function;
@@ -46,11 +46,13 @@ export default class Watcher {
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
-    options?: ?Object,
-    isRenderWatcher?: boolean
+    options?: ?Object, // 对应上面的 { before () {...}  } 对象
+    isRenderWatcher?: boolean // 是否渲染watcher，首次 $mount
   ) {
     this.vm = vm
     if (isRenderWatcher) {
+      // 如果是渲染 watcher 就在该渲染 watcher 挂载到 vm 上
+      // 前面的 mountComponent 说过是给子组件中调用 vm.$forceUpdate 时准备的
       vm._watcher = this
     }
     vm._watchers.push(this)
@@ -69,7 +71,7 @@ export default class Watcher {
     this.active = true
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
-    this.newDeps = []
+    this.newDeps = [] // 新关联起来的 dep
     this.depIds = new Set()
     this.newDepIds = new Set()
     this.expression = process.env.NODE_ENV !== 'production'
@@ -99,10 +101,13 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 打开 Dep.target，Dep.target = this，this 就是 watcher 实例啊
+    // 这个地方再下面的收集依赖的时候用
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      //  执行回调函数，比如 updateComponent，进入 patch 阶段
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -116,6 +121,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
+      // 关闭 Dep.target, Dep.target = null
       popTarget()
       this.cleanupDeps()
     }
@@ -125,12 +131,20 @@ export default class Watcher {
   /**
    * Add a dependency to this directive.
    */
+  // 两件事：
+  // 1. 添加 dep 给自己 watcher
+  // 2. 添加自己 (watcher) 到 dep
   addDep (dep: Dep) {
+    // 判重，如果 dep 已经存在则不重复添加
     const id = dep.id
     if (!this.newDepIds.has(id)) {
+      // 缓存 dep.id 用于判重
       this.newDepIds.add(id)
       this.newDeps.push(dep)
+      // 避免在 dep 中重复添加 watcher，
+      // this.depIds 的设置在 cleanupDeps 方法中
       if (!this.depIds.has(id)) {
+        // 添加 watcher 自己到 dep 中
         dep.addSub(this)
       }
     }

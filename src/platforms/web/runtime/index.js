@@ -31,6 +31,7 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// 负责初次渲染和响应式数据更新后的更新渲染工作
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method

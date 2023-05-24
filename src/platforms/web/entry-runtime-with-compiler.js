@@ -16,7 +16,7 @@ const idToTemplate = cached((id) => {
   const el = query(id);
   return el && el.innerHTML;
 });
-// web 公共的 $mount
+// web 公共的 $mount, 下面的又到了这里
 const mount = Vue.prototype.$mount;
 // 重写Vue.prototype.$mount 方法
 Vue.prototype.$mount = function (

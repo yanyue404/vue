@@ -59,7 +59,7 @@ export function setCurrentRenderingInstance (vm: Component) {
 }
 
 export function renderMixin (Vue: Class<Component>) {
-  // install runtime convenience helpers
+  // 渲染函数帮助函数的注册，_l/_t/_v/_s...
   installRenderHelpers(Vue.prototype)
 
   Vue.prototype.$nextTick = function (fn: Function) {
@@ -80,6 +80,7 @@ export function renderMixin (Vue: Class<Component>) {
 
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
+    // 设置父 vnode，这使得渲染函数可以访问占位符节点上的数据
     vm.$vnode = _parentVnode
     // render self
     let vnode

@@ -56,24 +56,35 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 负责更新页面，包括页面的首次渲染和数据发生变更后更新页面的入口，也是 patch 的入口位置
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
+
+    // 页面的挂载点，真实元素
     const prevEl = vm.$el
+
+    // 旧的 VNode
+    // 什么时候有旧的 VNode 呢？
+    // 当然是数据发生变化需要更新时，初次渲染的 VNode 对于更新时得到的 VNode 旧的 VNode
+    // 通过 prevVnode 暂存旧的 VNode，这有啥用？DOM diff 就是比较这新旧两颗数据
     const prevVnode = vm._vnode
     const restoreActiveInstance = setActiveInstance(vm)
+
+    // 新的 VNode
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // initial render 首次渲染即始化渲染
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // updates 响应式数据更新带来的更新视图的过程就是个 else
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
     // update __vue__ reference
     if (prevEl) {
+      // 解除旧的 VNode 对 vm 的引用
       prevEl.__vue__ = null
     }
     if (vm.$el) {
@@ -85,6 +96,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // updated hook is called by the scheduler to ensure that children are
     // updated in a parent's updated hook.
+    // updated 生命周期钩子将会在 scheduler 调用，
+    // 以保证子节点的 updated 在父节点的 updated 调用过程中被调用
   }
 
   Vue.prototype.$forceUpdate = function () {
@@ -188,6 +201,8 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // 执行 vm._render() 函数，得到虚拟 VNode，
+      // 并将 VNode 传递给 vm._update 方法，接下来就该到 patch 阶段了
       vm._update(vm._render(), hydrating)
     }
   }
@@ -195,17 +210,22 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // ! 注册的是渲染 watcher， 一个实例一个
+  // 如果是渲染 watcher 就把 watcher 挂载到 vm 实例上：vm._watcher , $forceUpdate 依靠的更新就是它
+  // expOrFn 是负责渲染的 updateComponent 方法
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
     }
-  }, true /* isRenderWatcher */)
+  }, true /* true 就是标识这个 watcher 是渲染 watcher */)
   hydrating = false
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // 手动挂载实例调用 vm 上的 mounted 钩子
+  // 由渲染函数创建的子组件的 mounted 钩子将会在组件的 inserted hook 中调用
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')
