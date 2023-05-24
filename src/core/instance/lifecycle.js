@@ -357,6 +357,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
+  // 生命周期钩子都是数组格式
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
   if (handlers) {
@@ -364,6 +365,13 @@ export function callHook (vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // 生命周期钩子的事件侦听器
+  {/* <child
+    @hook:beforeCreate="handleChildBeforeCreate"
+    @hook:created="handleChildCreated"
+    @hook:mounted="handleChildMounted"
+    @hook:生命周期钩子
+  /> */}
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

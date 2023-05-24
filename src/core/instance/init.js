@@ -36,6 +36,7 @@ export function initMixin(Vue: Class<Component>) {
       initInternalComponent(vm, options);
     } else {
       vm.$options = mergeOptions(
+        // 解析构造者的 options
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
@@ -43,6 +44,7 @@ export function initMixin(Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== "production") {
+      // 对实例对象 vm 的代理，通过原生的 Proxy 实现
       initProxy(vm);
     } else {
       vm._renderProxy = vm;

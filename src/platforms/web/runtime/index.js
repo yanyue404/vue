@@ -27,7 +27,9 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 安装特定平台运行时的指令和组件，两个指令分别是 model 和 show
 extend(Vue.options.directives, platformDirectives)
+// 混合了两个组件(components)，分别是 Transition 和 TransitionGroup
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function

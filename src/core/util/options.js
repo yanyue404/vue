@@ -161,6 +161,7 @@ function dedupeHooks(hooks) {
   return res;
 }
 
+// 生命周期钩子选项的合并策略
 LIFECYCLE_HOOKS.forEach((hook) => {
   strats[hook] = mergeHook;
 });
@@ -233,7 +234,7 @@ strats.watch = function (
 /**
  * Other object hashes.
  */
-strats.props = strats.methods = strats.inject = strats.computed = function (
+strats.props = strats.methods  = strats.inject = strats.computed = function (
   parentVal: ?Object,
   childVal: ?Object,
   vm?: Component,
@@ -393,9 +394,10 @@ export function mergeOptions(
   if (typeof child === "function") {
     child = child.options;
   }
-  // 规范化 props
+  // 规范化 props，规范化为对象结构 { propName: {type: String, default: ""}}
   normalizeProps(child, vm);
   normalizeInject(child, vm);
+  // 规范化指令
   normalizeDirectives(child);
 
   // Apply extends and mixins on the child options,
@@ -417,6 +419,7 @@ export function mergeOptions(
   const options = {};
   let key;
   for (key in parent) {
+    // ! 选项合并 （data，生命周期钩子，props， methods，inject，computed ）
     mergeField(key);
   }
   for (key in child) {
@@ -425,6 +428,7 @@ export function mergeOptions(
     }
   }
   function mergeField(key) {
+    // 当一个选项没有对应的策略函数时，使用默认策略
     const strat = strats[key] || defaultStrat;
     options[key] = strat(parent[key], child[key], vm, key);
   }

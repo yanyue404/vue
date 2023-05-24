@@ -7,6 +7,7 @@ import { FunctionalRenderContext } from "core/vdom/create-functional-component";
 // 扩展 {... config,set,delete,nextTick,options,use,mixin,extend,component,directive,filter}
 initGlobalAPI(Vue);
 
+// 是不是服务端环境
 Object.defineProperty(Vue.prototype, "$isServer", {
   get: isServerRendering,
 });
@@ -23,6 +24,7 @@ Object.defineProperty(Vue, "FunctionalRenderContext", {
   value: FunctionalRenderContext,
 });
 
+// rollup replace 插件替换版本号
 Vue.version = "__VERSION__";
 
 export default Vue;

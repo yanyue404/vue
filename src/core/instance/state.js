@@ -46,6 +46,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 }
 
 export function initState (vm: Component) {
+  // 存储所有该组件实例的 watcher 对象
   vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
@@ -321,6 +322,7 @@ export function stateMixin (Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {}
+  // $data 代理 _data 的实例属性
   dataDef.get = function () { return this._data }
   const propsDef = {}
   propsDef.get = function () { return this._props }

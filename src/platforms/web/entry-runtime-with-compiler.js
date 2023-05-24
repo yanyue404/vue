@@ -12,6 +12,7 @@ import {
   shouldDecodeNewlinesForHref,
 } from "./util/compat";
 
+// 根据 id 获取元素的 innerHTML
 const idToTemplate = cached((id) => {
   const el = query(id);
   return el && el.innerHTML;
@@ -92,6 +93,7 @@ Vue.prototype.$mount = function (
 };
 
 /**
+ * 获取元素的 outerHTML
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */
@@ -104,7 +106,7 @@ function getOuterHTML(el: Element): string {
     return container.innerHTML;
   }
 }
-// 新增
+// 新增 compile
 Vue.compile = compileToFunctions;
 
 export default Vue;

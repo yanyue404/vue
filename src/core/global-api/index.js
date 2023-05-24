@@ -19,7 +19,6 @@ import {
 } from "../util/index";
 
 export function initGlobalAPI(Vue: GlobalAPI) {
-  // config
   const configDef = {};
   configDef.get = () => config;
   if (process.env.NODE_ENV !== "production") {
@@ -29,6 +28,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
       );
     };
   }
+  // config 代理的是从 core/config.js 文件导出的对象
   Object.defineProperty(Vue, "config", configDef);
 
   // exposed util methods.
@@ -54,6 +54,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
     /* 初始化 options */
   }
   Vue.options = Object.create(null);
+  {/* 初始化 component，directive，filter */}
   ASSET_TYPES.forEach((type) => {
     Vue.options[type + "s"] = Object.create(null);
   });
@@ -61,6 +62,11 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   // this is used to identify the "base" constructor to extend all plain-object
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue;
+
+  {/* Vue.options.components 混入 KeepAlive
+    * Transition 和 TransitionGroup 组件在 runtime/index.js 文件中被添加
+    */
+  }
 
   extend(Vue.options.components, builtInComponents);
   {
