@@ -63,6 +63,7 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
   - https://hcysunyang.github.io/vue-design/zh/
 - [抽丝剥茧带你复习 vue 源码（2023 年面试版本）](https://juejin.cn/post/7195517440344211512)
 - [浅曦 vue 源码](https://juejin.cn/column/7054724545126596615)
+- [processon vue 源码解析流程图](https://www.processon.com/mindmap/64782a1c7fa8dd4359265019)
 
 ## Others
 

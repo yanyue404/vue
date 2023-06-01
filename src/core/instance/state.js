@@ -239,10 +239,12 @@ export function defineComputed (
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// 重写 get 方法
 function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      // 如果当前的 dirty 为 true，说明就需要重新计算，则调用 watcher.evaluate 方法进行计算
       if (watcher.dirty) {
         watcher.evaluate()
       }
@@ -356,6 +358,7 @@ export function stateMixin (Vue: Class<Component>) {
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // 立刻执行
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value)
@@ -363,6 +366,7 @@ export function stateMixin (Vue: Class<Component>) {
         handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
       }
     }
+    // 返回一个卸载方法
     return function unwatchFn () {
       watcher.teardown()
     }

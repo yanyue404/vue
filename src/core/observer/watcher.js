@@ -177,11 +177,18 @@ export default class Watcher {
    */
   update () {
     /* istanbul ignore else */
+    // computed 的 lazy watcher
     if (this.lazy) {
+      // 将 dirty 置为 true，
+      // 就可以让 计算属性对应的 getter 被访问到的时候
+      // 再触发重新计算 computed 回调函数的执行结果
       this.dirty = true
     } else if (this.sync) {
       this.run()
     } else {
+      // 更新时一般都在这里，
+      // 将 watcher 放入到 watcher 队列,
+      // 然后异步更新队列
       queueWatcher(this)
     }
   }
@@ -192,25 +199,32 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
+      console.log('watch' + this.id + '视图更新啦～');
+      // 调用 this.get 方法对 watcher 重新求值
       const value = this.get()
       if (
         value !== this.value ||
-        // Deep watchers and watchers on Object/Arrays should fire even
-        // when the value is the same, because the value may
-        // have mutated.
+        // deep wathcer 和 Object/Array 的 watcher 即便是同一个值也要触发重新计算
+        // 因为有可能其中的key value 已经发生了变化
         isObject(value) ||
         this.deep
       ) {
         // set new value
+        // 缓存旧值为之前的 value
         const oldValue = this.value
+        // 更新 value 为最新求得的 value
         this.value = value
         if (this.user) {
           try {
+            // 如果是用户 watcher，则执行用户传递的第三个参数——回调函数，
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
         } else {
+          // 更新一个渲染 watcher 时，
+          // 也就是说这个 run 方法是由渲染 watcher.run 调用，
+          // 其 cb 是调用了 updateComponent 方法
           this.cb.call(this.vm, value, oldValue)
         }
       }

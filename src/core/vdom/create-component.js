@@ -33,6 +33,7 @@ import {
 } from 'weex/runtime/recycle-list/render-component-template'
 
 // inline hooks to be invoked on component VNodes during patch
+// 创建自定义组件增加 4 个钩子
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
@@ -44,17 +45,22 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 普通组件的创建过程
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      // 这条路直到组件被挂载到父节点上
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
-
+  //  更新 VNode，用新的 VNode 配置更新旧的的 VNode 
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+     // 新的 VNode，用新的 VNode 配置更新旧的 VNode 上的各种属性
     const options = vnode.componentOptions
+    // 老的 VNode 组件的组件实例
     const child = vnode.componentInstance = oldVnode.componentInstance
+    // 用 vnode 上的属性更新 child 上的各种属性
     updateChildComponent(
       child,
       options.propsData, // updated props
@@ -64,6 +70,7 @@ const componentVNodeHooks = {
     )
   },
 
+  // 执行组件的 mounted 生命周期钩子
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
     if (!componentInstance._isMounted) {
@@ -84,6 +91,7 @@ const componentVNodeHooks = {
     }
   },
 
+  // 销毁组件：
   destroy (vnode: MountedComponentVNode) {
     const { componentInstance } = vnode
     if (!componentInstance._isDestroyed) {

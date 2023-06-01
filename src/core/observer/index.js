@@ -229,6 +229,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // 添加响应，并触发dep.notify执行更新
   defineReactive(ob.value, key, val)
   ob.dep.notify()
   return val

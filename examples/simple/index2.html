@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue</title>
+  </head>
+  <body>
+    <!-- https://juejin.cn/post/7078897921801846798 -->
+    <div id="app">
+      <button id="btn" @click="goForPatch">使 forProp.a++</button>
+      <some-com :some-key="forProp"
+        ><div slot="namedSlot">SLOT-CONTENT</div></some-com
+      >
+      <div>forPatchComputed = {{forPatchComputed}}</div>
+      <div class="static-div">静态节点</div>
+    </div>
+    <script src="../../dist/vue.js"></script>
+    <script>
+      const sub = {
+        template: `
+          <div style="color: red;background: #5cb85c;display: inline-block">
+        <slot name="namedSlot">slot-fallback-content</slot>
+        {{ someKey.a + ' foo' }}
+       </div>`,
+        props: {
+          someKey: {
+            type: Object,
+            default() {
+              return { a: "996-rejected!!" };
+            },
+          },
+        },
+      };
+      new Vue({
+        el: "#app",
+        data: {
+          forProp: {
+            a: 100,
+          },
+        },
+        methods: {
+          goForPatch() {
+            this.forProp.a++;
+          },
+        },
+        computed: {
+          // 计算属性
+          forPatchComputed() {
+            return this.forProp.a + " reject 996";
+          },
+        },
+        components: {
+          someCom: sub,
+        },
+        mounted() {
+          console.log("mounted");
+        },
+      });
+    </script>
+  </body>
+</html>

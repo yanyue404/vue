@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue</title>
+  </head>
+  <body>
+    <div id="app">
+      <button @click="goForPatch">使 forProp.a++</button>
+      <div v-if="imgFlag">===> {{forProp.a}}</div>
+      <img v-else :src="imgSrc" onload="console.log('img onload')" />
+    </div>
+    <script src="../../dist/vue.js"></script>
+    <script>
+      const src =
+        "https://gift-static.hongyibo.com.cn/static/ad_oss/image-1004-294/6139ce3ed297e/16311783028626.jpg";
+      new Vue({
+        el: "#app",
+        data: {
+          forProp: {
+            a: 100,
+          },
+          imgFlag: false,
+          imgSrc: src,
+        },
+        methods: {
+          goForPatch() {
+            this.forProp.a++;
+          },
+        },
+
+        watch: {
+          // 这个 watch 选项就是 用户 watcher，
+          // 有别于 Vue 自己创建的渲染 watcher、计算属性对应的 lazy watcher
+          "forProp.a"(nv, ov) {
+            this.imgFlag = !this.imgFlag;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

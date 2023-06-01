@@ -53,11 +53,11 @@ export function initMixin(Vue: Class<Component>) {
     vm._self = vm;
     initLifecycle(vm); // $partent,$root,$children
     initEvents(vm); // 事件监听初始化 $on,$emit,$off
-    initRender(vm); // $slots,$createElement
+    initRender(vm); // $slots, $createElement
     callHook(vm, "beforeCreate");
     initInjections(vm); // resolve injections before data/props
     initState(vm); // ! 初始化组件各种状态（data, methods, props, computed, watch） _props methods _data _computedWatchers（computed） watch
-    initProvide(vm); // _provided（resolve provide after data/props）
+    initProvide(vm); // 初始化 provide _provided（resolve provide after data/props）
     callHook(vm, "created");
 
     /* istanbul ignore if */

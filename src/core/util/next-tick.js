@@ -14,6 +14,8 @@ function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
   callbacks.length = 0
+  // 遍历 copies 数组，
+  // 数组中存储的是 flushSchedulerQueue 包装函数
   for (let i = 0; i < copies.length; i++) {
     copies[i]()
   }
@@ -84,6 +86,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
+// cb：下一个 tick 需要调用的回调函数，经过包装放到 callbacks 列表中；
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
@@ -97,8 +100,11 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
+  // 维护 pending，进来后关闭，保证浏览器在下个事件循环的任务队列中只有 flushCallback
   if (!pending) {
     pending = true
+    // timerFunc 负责把 flushCallbacks 放入到下个事件循环中
+    // 异步的执行机制都在这里 Promise > MuatationObserver > setImmedaite > setTimeout
     timerFunc()
   }
   // $flow-disable-line
