@@ -68,6 +68,8 @@ export function initMixin(Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
+      // * platforms/web/entry-runtime-with-compiler.js 编译 render 函数
+      // * 然后交给 ./lifecycle.js mountComponent 方法
       vm.$mount(vm.$options.el);
     }
   };

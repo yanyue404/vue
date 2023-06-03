@@ -1,16 +1,20 @@
 > vue 源码 https://github.dev/yanyue404/vue
-> 
+>
 > 思维导图： https://www.processon.com/view/link/5d1eb5a0e4b0fdb331d3798c
 
-## 调试 Vue 项目的方式
+## 调试 Vue 项目源码的方式
 
 1. 安装依赖：npm i
 2. 安装打包⼯具：npm i rollup -g
 3. 修改 package.json ⾥⾯ dev 脚本：
 
-```js
-"dev": "rollup -w -c scripts/config.js --sourcemap --environment
-TARGET:web-full-dev"
+```json
+{
+  "scripts": {
+    "//": "实时构建完整版 umd 模块的 Vue (sourcemap 调试)",
+    "dev": "rollup -w -c scripts/config.js --sourcemap --environment TARGET:web-full-dev"
+  }
+}
 ```
 
 4. 执⾏打包 `npm run dev`
@@ -37,21 +41,28 @@ new Vue({
 
 ![](https://v2.cn.vuejs.org/images/lifecycle.png)
 
+- vue 初始化前的准备
+  - Vue 基础构造函数（最内层）
+  - vm 实例混入属性方法
+  - global api 注册
+  - runtime web 平台运行时注册方法
+  - entry-runtime-with-compiler 运行时带编译（最外层）
+- `new Vue()`
 - `_init`
-  - init Events & Lifecycle 往 vm 上挂载各种属性
+  - init Events & Lifecycle 往 vm 上挂载各种初始化属性方法
   - `callHook(vm, "beforeCreate")` 实例刚刚创建
-  - init Injections & reactivity 初始化注入和 data 响应性
+  - init Injections & reactivity 初始化注入组件的各种状态（data, methods, props, computed, watch、provide）
   - `callHook(vm, "created")` 创建完成，属性已经绑定，但还未生成真实 dom
   - 进行元素的挂载： `$el / vm.$mount()`
   - 是否有 template，解析成 render 函数
     - `*.vue` 文件： vue-loader 会将 `<template>` 编译成 render 函数
   - beforeMount: 模板编译/挂载之前
-  - 执行 render 函数，生成真实的 dom，并替换到 dom tree 中，绑定观察者监听 updateComponent
+  - 绑定**渲染 watcher**监听 **updateComponent**, updateComponent 的作用：执行 render 函数，生成真实的 dom，并替换到 dom tree 中
   - `mounted`: 组件已挂载
 - `_update`
   - 执行 diff 算法，对比改变是否需要触发 UI 更新
   - flushSchedulerQueue 清空异步队列计划
-    - watcher.before(): 触发 beforeUpdate 钩子， watcher.run(); 通知所有依赖项更新 UI
+    - watcher.before(): 触发 beforeUpdate 钩子， **渲染 watcher**及其他 watcher `run()` 通知所有依赖项 diff 更新 UI
     - 触发 updated 钩子，组件已更新
 - `$destroy`
   - `callHook(vm, 'beforeDestroy')`: 销毁开始
@@ -63,7 +74,9 @@ new Vue({
 
 ## 代码形式看 Vue 的初始化
 
-### 入口文件
+初始化顺序从里到外，但源码查看却是从外到内，=> 寻找 vue 的出生构造函数。
+
+### 带编译的入口文件
 
 - scripts/config.js
 
@@ -115,7 +128,7 @@ Vue.prototype.$mount = function (
 };
 ```
 
-### 运行时定义
+### web 平台运行时定义
 
 - src\platforms\web\runtime\index.js
 
@@ -176,6 +189,8 @@ renderMixin(Vue); // $nextTick，_render
 export default Vue;
 ```
 
+### new Vue()
+
 - src\core\instance\init.js initMixin
 
 ```js
@@ -217,6 +232,95 @@ export function initState(vm: Component) {
     initWatch(vm, opts.watch);
   }
 }
+```
+
+### 初始化渲染（$mount）及增量 diff 更新
+
+在运行时阶段就绑定好真实的 mountComponent 渲染方法
+
+```js
+export function mountComponent(
+  vm: Component,
+  el: ?Element,
+  hydrating?: boolean
+): Component {
+  vm.$el = el;
+  if (!vm.$options.render) {
+    vm.$options.render = createEmptyVNode;
+  }
+  // 触发钩子
+  callHook(vm, "beforeMount");
+  //创建 updateComponent
+  let updateComponent;
+
+  updateComponent = () => {
+    // 根据 diff 出的 paths 挂载成真实的 dom
+    vm._update(vm._render(), hydrating);
+  };
+
+  // we set this to vm._watcher inside the watcher's constructor
+  // since the watcher's initial patch may call $forceUpdate (e.g. inside child
+  // component's mounted hook), which relies on vm._watcher being already defined
+  // 初始化观察者
+  // render 渲染成 vdom， 数据变化时，虚拟dom re-render 和 patch
+  new Watcher(
+    vm,
+    updateComponent,
+    noop,
+    {
+      before() {
+        if (vm._isMounted && !vm._isDestroyed) {
+          callHook(vm, "beforeUpdate");
+        }
+      },
+    },
+    true /* isRenderWatcher */
+  );
+  hydrating = false;
+
+  // manually mounted instance, call mounted on self
+  // mounted is called for render-created child components in its inserted hook
+  if (vm.$vnode == null) {
+    vm._isMounted = true;
+    callHook(vm, "mounted");
+  }
+  return vm;
+}
+```
+
+- src\core\instance\lifecycle.js \_update
+
+```js
+// Vue.prototype.__patch__ 在运行时中已定义
+
+Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+  const vm: Component = this;
+  const prevEl = vm.$el;
+  const prevVnode = vm._vnode;
+  const restoreActiveInstance = setActiveInstance(vm);
+  vm._vnode = vnode;
+  // Vue.prototype.__patch__ is injected in entry points
+  // based on the rendering backend used.
+  if (!prevVnode) {
+    // initial render
+    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
+  } else {
+    // updates
+    vm.$el = vm.__patch__(prevVnode, vnode);
+  }
+  restoreActiveInstance();
+  // update __vue__ reference
+  if (prevEl) {
+    prevEl.__vue__ = null;
+  }
+  if (vm.$el) {
+    vm.$el.__vue__ = vm;
+  }
+  // if parent is an HOC, update its $el as well
+  if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
+    vm.$parent.$el = vm.$el;
+  }
+};
 ```
 
 ### 数据响应式
@@ -376,6 +480,8 @@ watcher 和 dep 互相添加引⽤
   }
 ```
 
+### 异步更新机制
+
 watcher 更新逻辑：通常情况下会执⾏ queueWatcher，执⾏异步更新
 
 ```js
@@ -388,6 +494,11 @@ watcher 更新逻辑：通常情况下会执⾏ queueWatcher，执⾏异步更�
     } else {
       queueWatcher(this)
     }
+  },
+  run () {
+      tip('\nwatcher id:' + this.id + '\n表达式：' + this.expression + '\n视图更新啦～');
+      // 调用 this.get 方法对 watcher 重新求值
+      const value = this.get()
   }
 ```
 
@@ -628,95 +739,6 @@ class Watcher {
     callHook("beforeUpdate");
   }
 }
-```
-
-### 挂载节点
-
-在运行时阶段就绑定好真实的 mountComponent 渲染方法
-
-```js
-export function mountComponent(
-  vm: Component,
-  el: ?Element,
-  hydrating?: boolean
-): Component {
-  vm.$el = el;
-  if (!vm.$options.render) {
-    vm.$options.render = createEmptyVNode;
-  }
-  // 触发钩子
-  callHook(vm, "beforeMount");
-  //创建 updateComponent
-  let updateComponent;
-
-  updateComponent = () => {
-    // 根据 diff 出的 paths 挂载成真实的 dom
-    vm._update(vm._render(), hydrating);
-  };
-
-  // we set this to vm._watcher inside the watcher's constructor
-  // since the watcher's initial patch may call $forceUpdate (e.g. inside child
-  // component's mounted hook), which relies on vm._watcher being already defined
-  // 初始化观察者
-  // render 渲染成 vdom， 数据变化时，虚拟dom re-render 和 patch
-  new Watcher(
-    vm,
-    updateComponent,
-    noop,
-    {
-      before() {
-        if (vm._isMounted && !vm._isDestroyed) {
-          callHook(vm, "beforeUpdate");
-        }
-      },
-    },
-    true /* isRenderWatcher */
-  );
-  hydrating = false;
-
-  // manually mounted instance, call mounted on self
-  // mounted is called for render-created child components in its inserted hook
-  if (vm.$vnode == null) {
-    vm._isMounted = true;
-    callHook(vm, "mounted");
-  }
-  return vm;
-}
-```
-
-- src\core\instance\lifecycle.js \_update
-
-```js
-// Vue.prototype.__patch__ 在运行时中已定义
-
-Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
-  const vm: Component = this;
-  const prevEl = vm.$el;
-  const prevVnode = vm._vnode;
-  const restoreActiveInstance = setActiveInstance(vm);
-  vm._vnode = vnode;
-  // Vue.prototype.__patch__ is injected in entry points
-  // based on the rendering backend used.
-  if (!prevVnode) {
-    // initial render
-    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
-  } else {
-    // updates
-    vm.$el = vm.__patch__(prevVnode, vnode);
-  }
-  restoreActiveInstance();
-  // update __vue__ reference
-  if (prevEl) {
-    prevEl.__vue__ = null;
-  }
-  if (vm.$el) {
-    vm.$el.__vue__ = vm;
-  }
-  // if parent is an HOC, update its $el as well
-  if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
-    vm.$parent.$el = vm.$el;
-  }
-};
 ```
 
 ### 卸载节点

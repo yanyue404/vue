@@ -2,6 +2,7 @@
 
 import {
   warn,
+  tip,
   remove,
   isObject,
   parsePath,
@@ -35,7 +36,7 @@ export default class Watcher {
   dirty: boolean;
   active: boolean;
   deps: Array<Dep>;
-  newDeps: Array<Dep>; 
+  newDeps: Array<Dep>;
   depIds: SimpleSet;
   newDepIds: SimpleSet;
   before: ?Function;
@@ -199,7 +200,7 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      console.log('watch' + this.id + '视图更新啦～');
+      tip('\nwatcher id:' + this.id + '\n表达式：' + this.expression + '\n视图更新啦～');
       // 调用 this.get 方法对 watcher 重新求值
       const value = this.get()
       if (
