@@ -36,6 +36,7 @@
         data: {
           forProp: {
             a: 100,
+            b: 101,
           },
         },
         methods: {
@@ -47,6 +48,13 @@
           // 计算属性
           forPatchComputed() {
             return this.forProp.a + " reject 996";
+          },
+        },
+        watch: {
+          "forProp.a": {
+            handler(newVal) {
+              this.forProp.b += newVal;
+            },
           },
         },
         components: {

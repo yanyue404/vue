@@ -200,7 +200,7 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      tip('\nwatcher id:' + this.id + '\n表达式：' + this.expression + '\n视图更新啦～');
+      tip('\nwatcher id:' + this.id + '\n表达式：' + this.expression + '\n被调度器执行啦～');
       // 调用 this.get 方法对 watcher 重新求值
       const value = this.get()
       if (

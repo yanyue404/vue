@@ -9,6 +9,7 @@
   <body>
     <div id="app">
       <div>{{number}}</div>
+      <div>{{number1}}</div>
       <button @click="handleClick">click</button>
     </div>
     <script src="../../dist/vue.js"></script>
@@ -18,13 +19,16 @@
         data() {
           return {
             number: 0,
+            number1: 1,
           };
         },
         methods: {
           handleClick() {
             for (let i = 0; i < 1000; i++) {
               this.number++;
+              this.number1++;
             }
+            // step:2
             // this.$nextTick(() => {
             //   console.log("$nextTick", this.number);
             // });

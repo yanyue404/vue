@@ -201,6 +201,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      console.log('diff 更新啦');
       // 执行 vm._render() 函数，得到虚拟 VNode，
       // 并将 VNode 传递给 vm._update 方法，接下来就该到 patch 阶段了
       vm._update(vm._render(), hydrating)
