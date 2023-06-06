@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>number 1000</title>
+  </head>
+  <body>
+    <div id="app">
+      更新子节点示例：
+      <ul>
+        <li v-for="item in list" :key="item.id">{{item.name}}</li>
+      </ul>
+      <div>
+        <button @click='list.unshift({ id: "e5", name: "E" })'>
+          向前插入一个 E
+        </button>
+        <button @click='list.push({ id: "e5", name: "E" })'>
+          向后插入一个 E
+        </button>
+        <button @click="fn">乱序后插入 E</button>
+      </div>
+    </div>
+    <script src="../../dist/vue.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            list: [
+              {
+                id: "a1",
+                name: "A",
+              },
+              {
+                id: "b2",
+                name: "B",
+              },
+              {
+                id: "c3",
+                name: "C",
+              },
+              {
+                id: "d4",
+                name: "D",
+              },
+            ],
+          };
+        },
+        methods: {
+          fn() {
+            this.list
+              .sort(() => Math.random() - 0.5)
+              .unshift({ id: "e5", name: "E" });
+          },
+        },
+        mounted() {
+          console.log("mounted");
+        },
+      });
+    </script>
+  </body>
+</html>
