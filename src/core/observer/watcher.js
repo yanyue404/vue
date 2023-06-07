@@ -93,6 +93,7 @@ export default class Watcher {
         )
       }
     }
+    // lazy Watcher 并不会立刻求值，而是返回的是 undefined。
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -180,15 +181,16 @@ export default class Watcher {
     /* istanbul ignore else */
     // computed 的 lazy watcher
     if (this.lazy) {
-      // 将 dirty 置为 true，
-      // 就可以让 计算属性对应的 getter 被访问到的时候
-      // 再触发重新计算 computed 回调函数的执行结果
+      // 将 dirty 置为 true，可以让 computedGetter 执行时重新计算 computed 回调函数的执行结果
       this.dirty = true
     } else if (this.sync) {
+      // 同步执行，在使用 vm.$watch 或者 watch 选项时可以传一个 sync 选项，
+      // 当为 true 时在数据更新时该 watcher 就不走异步更新队列，直接执行 this.run 
+      // 方法进行更新
+      // 这个属性在官方文档中没有出现
       this.run()
     } else {
-      // 更新时一般都在这里，
-      // 将 watcher 放入到 watcher 队列,
+      // 更新时一般都在这里，将 watcher 放入到 watcher 队列,
       // 然后异步更新队列
       queueWatcher(this)
     }

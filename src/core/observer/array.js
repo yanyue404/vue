@@ -6,8 +6,10 @@
 import { def } from '../util/index'
 
 const arrayProto = Array.prototype
+// 劫持数组的方法（基于克隆的一份数组原型）
 export const arrayMethods = Object.create(arrayProto)
 
+//七个变异方法
 const methodsToPatch = [
   'push',
   'pop',
@@ -26,6 +28,7 @@ methodsToPatch.forEach(function (method) {
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args)
+    // 额外通知变更，当然，只有这7个方法才会有这个待遇
     const ob = this.__ob__
     let inserted
     switch (method) {
@@ -37,8 +40,9 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2)
         break
     }
+    // 对新加入对象进行响应化处理
     if (inserted) ob.observeArray(inserted)
-    // notify change
+    // 此处通知，可以知道数组更新行为
     ob.dep.notify()
     return result
   })

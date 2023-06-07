@@ -53,7 +53,8 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     if (isIOS) setTimeout(noop)
   }
   isUsingMicroTask = true
-} else if (!isIE && typeof MutationObserver !== 'undefined' && (
+} else if (!isIE && typeof MutationObserver !== 'undefined' && (// MutationObserver 次之
+  //  MutationObserver 次之
   isNative(MutationObserver) ||
   // PhantomJS and iOS 7.x
   MutationObserver.toString() === '[object MutationObserverConstructor]'
@@ -75,7 +76,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
   // Technically it leverages the (macro) task queue,
-  // but it is still a better choice than setTimeout.
+  // 再就是 setImmediate，它其实已经是一个宏任务了，但仍然比 setTimeout 要好
   timerFunc = () => {
     setImmediate(flushCallbacks)
   }
@@ -100,10 +101,10 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
-  // 维护 pending，进来后关闭，保证浏览器在下个事件循环的任务队列中只有 flushCallback
+  // 维护 pending，进来后关闭，保证浏览器在下个事件循环的任务队列中只有一个 flushCallback 函数
   if (!pending) {
     pending = true
-    // timerFunc 负责把 flushCallbacks 放入到下个事件循环中
+    // timerFunc 负责把 flushCallbacks 放入到下个事件循环中（首选微任务队列）
     // 异步的执行机制都在这里 Promise > MuatationObserver > setImmedaite > setTimeout
     timerFunc()
   }

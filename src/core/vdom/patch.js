@@ -30,6 +30,7 @@ import {
 
 export const emptyNode = new VNode('', {}, [])
 
+//VDOM生命周期钩子函数
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 // isComment（是否为注释节点）
@@ -78,7 +79,7 @@ export function createPatchFunction (backend) {
   const cbs = {}
 
   const { modules, nodeOps } = backend
-
+  // 引入DOM属性相关的生命周期钩子函数
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
@@ -625,6 +626,7 @@ export function createPatchFunction (backend) {
     const oldCh = oldVnode.children
     const ch = vnode.children
     if (isDef(data) && isPatchable(vnode)) {
+      // 调用各个DOM属性相关的update钩子函数
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }

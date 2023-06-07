@@ -66,6 +66,7 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 - [processon vue 源码解析流程图](https://www.processon.com/mindmap/64782a1c7fa8dd4359265019)
 - [Vue 原理解析 - diff 部分](https://juejin.cn/user/3087084380239341/posts)
   - [Vue 原理解析（八）：一起搞明白令人头疼的 diff 算法](https://juejin.cn/post/6844903921408802829)
+- [精通 Vue 技术栈源码原理](https://github.com/liyongning/blog/issues?q=is%3Aopen+is%3Aissue+label%3AVue)
 
 ## Others
 

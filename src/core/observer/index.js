@@ -29,29 +29,36 @@ export function toggleObserving (value: boolean) {
 }
 
 /**
- * Observer class that is attached to each observed
- * object. Once attached, the observer converts the target
- * object's property keys into getter/setters that
- * collect dependencies and dispatch updates.
+  * 附加到每个被观察对象的观察者类
+  * 对象。一旦连接，观察者转换目标
+  * 对象的属性键变成getter/setter
+  * 收集依赖和调度更新。
  */
 export class Observer {
   value: any;
   dep: Dep;
   vmCount: number; // number of vms that have this object as root $data
 
+  // Observer对象在一个Vue组件实例中存在多个，取决于data数据嵌套了几个Object对象或数组
   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
+    // 如果是数组
+    // arrayMethods，劫持的数组原型
     if (Array.isArray(value)) {
+      // 如果能够使用原型特性，直接将变异方法赋予响应化数组的原型链上
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
+        // 如果无法使用原型，那么通过defineProperty的方式将变异方法赋予响应化数组
         copyAugment(value, arrayMethods, arrayKeys)
       }
+      // 接着，对数组子元素，进行新一轮的observe数据响应化的过程
       this.observeArray(value)
     } else {
+      // 如果是对象
       this.walk(value)
     }
   }
@@ -140,6 +147,7 @@ export function defineReactive (
   shallow?: boolean
 ) {
   // 创建 Dep 实例，这个下面的 Dep 上的 depend 会用到
+   // 一个key 一个dep(),一一对应
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -154,6 +162,8 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // val如果是对象或者数组，会递归observe
+  // 每一个对象或数组的出现，都会出现一个新的Observer
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -161,6 +171,7 @@ export function defineReactive (
     // get 拦截对 obj[key] 的读取操作
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+      // Watcher的产生是在第一次 $mounted 的过程中生成的
       if (Dep.target) {
         // 依赖收集，在 dep 中添加 watcher，也在 watcher 中添加 dep
         dep.depend()
@@ -191,6 +202,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
+      // 特别处理：如果最新赋值是对象，该对象仍然需要响应化处理
       childOb = !shallow && observe(newVal)
       dep.notify()
     }
