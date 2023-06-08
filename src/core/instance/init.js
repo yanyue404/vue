@@ -53,7 +53,7 @@ export function initMixin(Vue: Class<Component>) {
     // expose real self
     vm._self = vm;
     initLifecycle(vm); // $partent,$root,$children
-    initEvents(vm); // 事件监听初始化 $on,$emit,$off
+    initEvents(vm); // 事件监听初始化 _events，初始化父级附加的事件
     initRender(vm); // $slots, $createElement
     callHook(vm, "beforeCreate");
     initInjections(vm); // resolve injections before data/props

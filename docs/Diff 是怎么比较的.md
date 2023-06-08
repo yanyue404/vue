@@ -93,7 +93,11 @@ patchVnode 具体规则如下：
 
 **updateChildren**
 
-updateChildren 主要作⽤是⽤⼀种较⾼效的⽅式⽐对新旧两个 VNode 的 children 得出最⼩操作补丁。执⾏⼀个双循环是传统⽅式，vue 中针对 web 场景特点做了特别的算法优化.
+updateChildren 主要作⽤是⽤⼀种较⾼效的⽅式⽐对新旧两个 VNode 的 children 得出最⼩操作补丁。
+
+优化策略：只需要尝试使用相同位置的两个节点来对比是否是同一个节点，如果恰巧是同一个节点，接着就可以进入更新节点的操作；如果尝试失败了，再用循环的方式来查找节点。
+
+执⾏⼀个双循环是传统⽅式，vue 中针对 web 场景特点做了特别的算法优化.
 
 ```js
 function updateChildren(parentElm, oldCh, newCh) {
@@ -190,6 +194,8 @@ function updateChildren(parentElm, oldCh, newCh) {
 ```
 
 最后的收尾代码：
+
+处理无法覆盖到的节点，哪些节点是未处理过的~
 
 ```js
 function updateChildren(parentElm, oldCh, newCh) {

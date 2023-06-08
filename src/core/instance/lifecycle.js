@@ -120,6 +120,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       remove(parent.$children, vm)
     }
     // teardown watchers
+    // 从 watcher 监听的所有状态的依赖列表中移除 watcher
     if (vm._watcher) {
       vm._watcher.teardown()
     }

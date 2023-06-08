@@ -81,12 +81,12 @@ export function eventsMixin (Vue: Class<Component>) {
 
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
-    // all
+    // 移除所有事件监听
     if (!arguments.length) {
       vm._events = Object.create(null)
       return vm
     }
-    // array of events
+    // events 支持数组
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         vm.$off(event[i], fn)
@@ -94,10 +94,12 @@ export function eventsMixin (Vue: Class<Component>) {
       return vm
     }
     // specific event
+    // 移除该事件的所有监听器
     const cbs = vm._events[event]
     if (!cbs) {
       return vm
     }
+    // 只移除与 fn 相同的监听器
     if (!fn) {
       vm._events[event] = null
       return vm
