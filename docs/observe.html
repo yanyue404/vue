@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>{{name}}</div>
+    <script>
+      // 依赖收集类 Dep，提供添加 watcher 和通知依赖更新的功能
+      class Dep {
+        constructor() {
+          this.subs = [];
+        }
+
+        addSub(sub) {
+          this.subs.push(sub);
+        }
+
+        notify() {
+          this.subs.forEach((sub) => sub.update());
+        }
+      }
+
+      // Watcher 类，负责更新视图
+      class Watcher {
+        constructor(vm, expOrFn, cb) {
+          this.vm = vm;
+          this.getter = expOrFn;
+          this.cb = cb;
+          this.value = this.get();
+        }
+
+        update() {
+          const value = this.get();
+          if (value !== this.value) {
+            const oldValue = this.value;
+            this.value = value;
+            this.cb.call(this.vm, value, oldValue);
+          }
+        }
+
+        get() {
+          Dep.target = this; // 将自己赋值给全局的 target，用来在 getter 中建立依赖
+          const value = this.getter.call(this.vm, this.vm); // 执行 getter
+          Dep.target = null; // 重置 target
+          return value;
+        }
+      }
+
+      // Vue 实例
+      class Vue {
+        constructor(options) {
+          this.$data = options.data;
+
+          // 监听数据变化，触发依赖更新
+          observer(this.$data);
+
+          // 初始化 Watcher，渲染视图
+          new Watcher(this, this._render.bind(this), function () {
+            console.log("视图更新了");
+          });
+
+          return this;
+        }
+
+        // 渲染函数
+        _render() {
+          console.log("渲染视图");
+        }
+      }
+
+      // 数据监听函数，使用 Object.defineProperty 实现响应式
+      function observer(data) {
+        if (!data || typeof data !== "object") {
+          return;
+        }
+
+        Object.keys(data).forEach((key) => {
+          let value = data[key];
+
+          observer(value); // 递归遍历
+
+          const dep = new Dep(); // 创建依赖管理器实例
+
+          Object.defineProperty(data, key, {
+            enumerable: true,
+            configurable: true,
+            get() {
+              if (Dep.target) {
+                dep.addSub(Dep.target); // 将当前 watcher 添加到依赖管理器实例中
+              }
+              return value;
+            },
+            set(newValue) {
+              if (newValue !== value) {
+                value = newValue;
+                dep.notify(); // 通知依赖更新
+              }
+            },
+          });
+        });
+      }
+
+      const vm = new Vue({
+        data: {
+          num: 1,
+        },
+      });
+      vm.$data.num = 2;
+    </script>
+  </body>
+</html>
