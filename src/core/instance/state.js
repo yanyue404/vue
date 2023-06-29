@@ -214,6 +214,7 @@ export function defineComputed (
   userDef: Object | Function
 ) {
   const shouldCache = !isServerRendering()
+  // 两种类型的计算属性：函数和对象
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
@@ -248,6 +249,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
+      // 将计算属性的 watcher 依次加入到这些 dep 实例的依赖列表中 
       if (Dep.target) {
         watcher.depend()
       }

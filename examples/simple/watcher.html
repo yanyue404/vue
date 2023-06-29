@@ -8,9 +8,10 @@
     <!-- https://juejin.cn/post/7078897921801846798 -->
     <div id="app">
       <button id="btn" @click="goForPatch">使 forProp.a++</button>
-      <some-com :some-key="forProp"
+      自定义组件要更新：<some-com :some-key="forProp"
         ><div slot="namedSlot">SLOT-CONTENT</div></some-com
       >
+      计算属性要更新：
       <div>forPatchComputed = {{forPatchComputed}}</div>
       <div class="static-div">静态节点</div>
     </div>

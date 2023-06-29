@@ -44,6 +44,8 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 作用：1. 标记数据是否已经被侦测过了变化（保证同一数据只侦测一次）
+    // 作用 2. 可以拿到 Observer 实例上保存的依赖，数组发生变化，向依赖发送通知
     def(value, '__ob__', this)
     // 如果是数组
     // arrayMethods，劫持的数组原型

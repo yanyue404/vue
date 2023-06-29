@@ -240,6 +240,7 @@ export default class Watcher {
    */
   evaluate () {
     this.value = this.get()
+     // 读取完值 dirty（脏）置为 false，dep 再次更新 watcher update 就又变成 dirty true
     this.dirty = false
   }
 
@@ -247,6 +248,7 @@ export default class Watcher {
    * Depend on all deps collected by this watcher.
    */
   depend () {
+    // deps 中保存了计算属性用到的所有 dep 实例，每个属性的 dep 实例中保存了它的所有依赖 
     let i = this.deps.length
     while (i--) {
       this.deps[i].depend()
