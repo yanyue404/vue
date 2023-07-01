@@ -97,8 +97,8 @@ export function parse (
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
-  let root
-  let currentParent
+  let root // 根标签节点
+  let currentParent // 当前标签的父标签节点
   let inVPre = false
   let inPre = false
   let warned = false
@@ -210,6 +210,8 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // 当解析到标签的开始位置时，触发该函数
+    // 标签名，标签的属性，是否是自闭合标签
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -296,7 +298,7 @@ export function parse (
         closeElement(element)
       }
     },
-
+    // 当解析到标签的结束位置时，触发该函数 
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
@@ -307,7 +309,7 @@ export function parse (
       }
       closeElement(element)
     },
-
+    // 当解析到文本时，触发该函数
     chars (text: string, start: number, end: number) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
@@ -357,11 +359,12 @@ export function parse (
         }
         let res
         let child: ?ASTNode
+        // parseText 解析带变量的文本解析器
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
             type: 2,
             expression: res.expression,
-            tokens: res.tokens,
+            tokens: res.tokens, // ! 嘿嘿, 这可是插值表达式的变量啊
             text
           }
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
@@ -379,6 +382,7 @@ export function parse (
         }
       }
     },
+    // 当解析到注释时，触发该函数
     comment (text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored

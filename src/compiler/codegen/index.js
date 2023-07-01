@@ -47,7 +47,7 @@ export function generate (
   const state = new CodegenState(options)
   const code = ast ? genElement(ast, state) : '_c("div")'
   return {
-    render: `with(this){return ${code}}`,
+    render: `with(this){return ${code}}`, // 最后拼 with 返回给调用者
     staticRenderFns: state.staticRenderFns
   }
 }
@@ -73,9 +73,11 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     // component or element
     let code
     if (el.component) {
+      // 拼接： _c(tagName, data, children)
       code = genComponent(el.component, el, state)
     } else {
       let data
+      // plain 是编译时设置的，如果节点没有属性，plain 则为 true
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
         data = genData(el, state)
       }
@@ -532,13 +534,14 @@ function genNode (node: ASTNode, state: CodegenState): string {
   }
 }
 
+// 文本节点
 export function genText (text: ASTText | ASTExpression): string {
   return `_v(${text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
     : transformSpecialNewlines(JSON.stringify(text.text))
   })`
 }
-
+// 注释节点
 export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
@@ -568,6 +571,7 @@ function genSlot (el: ASTElement, state: CodegenState): string {
   return res + ')'
 }
 
+// 元素节点
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
 function genComponent (
   componentName: string,

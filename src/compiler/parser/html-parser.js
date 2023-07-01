@@ -26,6 +26,7 @@ const doctype = /^<!DOCTYPE [^>]+>/i
 const comment = /^<!\--/
 const conditionalComment = /^<!\[/
 
+// 纯文本内容元素
 // Special Elements (can contain anything)
 export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
@@ -60,15 +61,17 @@ export function parseHTML (html, options) {
   let last, lastTag
   while (html) {
     last = html
+    // ? 父元素为正常标签的处理
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
-        // Comment:
+        // Comment: 截取注释
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
+            // 选项配置触发 comment 钩子
             if (options.shouldKeepComment) {
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
@@ -77,6 +80,7 @@ export function parseHTML (html, options) {
           }
         }
 
+        // 条件注释
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
@@ -106,6 +110,7 @@ export function parseHTML (html, options) {
         // Start tag:
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
+          // 解析出来的结果取出来调用 start 钩子函数即可 
           handleStartTag(startTagMatch)
           if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
             advance(1)
@@ -113,7 +118,7 @@ export function parseHTML (html, options) {
           continue
         }
       }
-
+      // 文本
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
@@ -124,14 +129,17 @@ export function parseHTML (html, options) {
           !conditionalComment.test(rest)
         ) {
           // < in plain text, be forgiving and treat it as text
+          // 如何 < 在文本中，将它视为 纯文本对待
           next = rest.indexOf('<', 1)
           if (next < 0) break
           textEnd += next
           rest = html.slice(textEnd)
         }
+        // 截取文本
         text = html.substring(0, textEnd)
       }
 
+      // 如果模板中找不到 <，说明整个模板都是文本
       if (textEnd < 0) {
         text = html
       }
@@ -139,11 +147,12 @@ export function parseHTML (html, options) {
       if (text) {
         advance(text.length)
       }
-
+      // 触发钩子
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
     } else {
+      // ? 父元素为 script、style、textarea 的处理逻辑
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
@@ -185,6 +194,7 @@ export function parseHTML (html, options) {
   }
 
   function parseStartTag () {
+    // 解析标签名，判断模板是否符合开始标签的特征
     const start = html.match(startTagOpen)
     if (start) {
       const match = {
@@ -193,6 +203,7 @@ export function parseHTML (html, options) {
         start: index
       }
       advance(start[0].length)
+      // 解析标签属性
       let end, attr
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
@@ -200,6 +211,7 @@ export function parseHTML (html, options) {
         attr.end = index
         match.attrs.push(attr)
       }
+      // 判断该标签是否是自闭合标签
       if (end) {
         match.unarySlash = end[1]
         advance(end[0].length)
@@ -209,6 +221,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // 将 start 钩子需要的参数整合并触发该钩子
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
