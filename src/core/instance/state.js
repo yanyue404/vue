@@ -356,7 +356,9 @@ export function stateMixin (Vue: Class<Component>) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
+    // 标记是用户的行为
     options.user = true
+     // 注意 expOrFn 支持函数，其读取的所有数据也都会被 Watcher 观察
     const watcher = new Watcher(vm, expOrFn, cb, options)
     // 立刻执行
     if (options.immediate) {

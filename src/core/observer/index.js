@@ -220,16 +220,21 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 数组：sValidArrayIndex 索引是有效数字就可
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 支持传入的索引大于 length
     target.length = Math.max(target.length, key)
+    // 拦截了
     target.splice(key, 1, val)
     return val
   }
+  // key 已经存在于 target 中
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
   const ob = (target: any).__ob__
+  // target 不能是vue 实例或 vue 实例的根数据对象($data)
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -237,6 +242,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+  // 不是响应式的，直接添加
   if (!ob) {
     target[key] = val
     return val
@@ -256,6 +262,7 @@ export function del (target: Array<any> | Object, key: any) {
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 数组删除指定位置即可
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
@@ -272,6 +279,7 @@ export function del (target: Array<any> | Object, key: any) {
     return
   }
   delete target[key]
+  // 只有响应式数据才发通知
   if (!ob) {
     return
   }

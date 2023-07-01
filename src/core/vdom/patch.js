@@ -474,7 +474,7 @@ export function createPatchFunction (backend) {
     if (process.env.NODE_ENV !== 'production') {
       checkDuplicateKeys(newCh)
     }
-    // 向中间靠拢 
+    // ! 向中间靠拢，循环体内的所有节点都是未处理过的 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       // 当 `oldStartVnode` 或者 `oldEndVnode` 不存在的时候，`oldStartIdx` 与 `oldEndIdx` 继续向中间靠拢
       // 跳过因位移留下的 undefined, 如果旧开始节点为undefined，就后移一位；如果旧结束节点为undefined，就前移一位。
@@ -482,7 +482,7 @@ export function createPatchFunction (backend) {
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
       } else if (isUndef(oldEndVnode)) {
         oldEndVnode = oldCh[--oldEndIdx]  // 老的结束
-      } // 开始快捷查找，两两双端对比 2*2 = 4 种情况 
+      } // ! 优化策略，避免很多循环操作 => 快捷查找，两两双端对比 4 种情况 
       else if (sameVnode(oldStartVnode, newStartVnode)) {
         // * 新开始和旧开始节点比对，如果匹配，表示它们位置都是对的
         // Dom不用改，就将新旧节点开始的下标往后移一位即可
@@ -497,6 +497,7 @@ export function createPatchFunction (backend) {
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
         // *  旧开始和新结束节点比对， 如果匹配，位置不对需要更新Dom视图
+        // ! 注意：插入到所有未处理节点的前面（下同）
         // 将旧开始节点对应的真实Dom插入到最后一位，旧开始节点下标后移一位，新结束节点下标前移一位。
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
         // 将 `oldStartVnode.elm` 这个节点直接移动到 `oldEndVnode.elm` 这个节点的后面即可。
@@ -514,7 +515,7 @@ export function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
-        // 不包括以上四种快捷比对方式
+        // ! 不包括以上四种快捷比对方式，循环查找对比
         if (isUndef(oldKeyToIdx)) {
           // 获取旧开始到结束节点的key和下表集合
           oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx) 
@@ -540,12 +541,16 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx] // 新开始下标和节点更新为第二个节点
       }
     }
-    if (oldStartIdx > oldEndIdx) { // 如果旧节点列表先处理完，处理剩余新节点
+    // ! 循环结束后仍然有为处理完的节点
+    // ? 如果旧节点列表先处理完，处理剩余新节点 => 插入到 DOM 中
+    if (oldStartIdx > oldEndIdx) {
       refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
-      // 新列表里还有没被使用的节点，创建真实Dom并插入到视图即可
+      // 新列表里还有没被使用的节点 （newStartIdx 到 newEndIdx 之间），创建真实Dom并插入到视图即可
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue) // 添加
-    } else if (newStartIdx > newEndIdx) { // 如果新节点列表先处理完，处理剩余旧节点
-      // 旧列表还有没被处理的废弃节点，删除即可
+    } 
+    // ? 如果新节点列表先处理完，处理剩余旧节点 => 删除废弃节点
+    else if (newStartIdx > newEndIdx) { 
+      // oldStartIdx 到 oldEndIdx 之间都是都是未处理过的
       removeVnodes(oldCh, oldStartIdx, oldEndIdx) // 删除废弃节点
     }
   }

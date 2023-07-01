@@ -4,6 +4,7 @@ import { initGlobalAPI } from "./global-api/index";
 import { isServerRendering } from "core/util/env";
 import { FunctionalRenderContext } from "core/vdom/create-functional-component";
 
+// 全局 API
 // 扩展 {... config,set,delete,nextTick,options,use,mixin,extend,component,directive,filter}
 initGlobalAPI(Vue);
 

@@ -19,9 +19,11 @@ export function traverse (val: any) {
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
   const isA = Array.isArray(val)
+  // 不是数组、对象，或已经被冻结，或是  vnode 对象，直接返回，什么都不做
   if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
     return
   }
+  // 保证不会重复收集依赖
   if (val.__ob__) {
     const depId = val.__ob__.dep.id
     if (seen.has(depId)) {
@@ -29,6 +31,7 @@ function _traverse (val: any, seen: SimpleSet) {
     }
     seen.add(depId)
   }
+  // 递归收集
   if (isA) {
     i = val.length
     while (i--) _traverse(val[i], seen)

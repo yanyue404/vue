@@ -120,6 +120,7 @@ export default class Watcher {
     } finally {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
+      // 递归 value 的所有子值来触发它们的依赖收集功能
       if (this.deep) {
         traverse(value)
       }
@@ -132,10 +133,13 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
+   * 当然， Dep 会记录数据发生变化时，自己需要通知哪些 Watcher
+   * 同样的，Watcher 中也同样记录了自己会被哪些 Dep 通知。
+   * 它们时多对多的关系
    */
   // 两件事：
-  // 1. 添加 dep 给自己 watcher
-  // 2. 添加自己 (watcher) 到 dep
+  // 1. 添加 dep 给自己 watcher，记录当前的 watcher 订阅了那些 dep
+  // 2. 添加自己 (watcher) 到 dep，将自己订阅到 Dep 中
   addDep (dep: Dep) {
     // 判重，如果 dep 已经存在则不重复添加
     const id = dep.id
@@ -255,6 +259,7 @@ export default class Watcher {
 
   /**
    * Remove self from all dependencies' subscriber list.
+   * 从所有依赖的 Dep 列表中将自己移除
    */
   teardown () {
     if (this.active) {
