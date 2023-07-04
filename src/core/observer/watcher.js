@@ -152,6 +152,7 @@ export default class Watcher {
       if (!this.depIds.has(id)) {
         // 添加 watcher 自己到 dep 中
         dep.addSub(this)
+        console.log('dep' + dep.id, this.expression);
       }
     }
   }

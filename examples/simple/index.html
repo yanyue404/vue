@@ -7,10 +7,10 @@
   </head>
   <body>
     <div id="app">
-      <h1>{{key}}</h1>
-      <div>{{count}}</div>
-      <div>{{bbb}}</div>
-      <button @click="handleClick">点击</button>
+      <h1>说明：{{intro}}</h1>
+      <div>count：{{count}}</div>
+      <div>computed: {{bbb}}</div>
+      <button @click="handleClick">点击 count ++</button>
       <ul>
         <template v-for="(item, index) in items">
           <li>{{ parentMessage }} - {{ index }} - {{ item.message }}</li>

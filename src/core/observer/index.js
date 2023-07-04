@@ -43,6 +43,7 @@ export class Observer {
   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
+    console.log('对象级 dep' + this.dep.id, value);
     this.vmCount = 0
     // 作用：1. 标记数据是否已经被侦测过了变化（保证同一数据只侦测一次）
     // 作用 2. 可以拿到 Observer 实例上保存的依赖，数组发生变化，向依赖发送通知
@@ -150,7 +151,10 @@ export function defineReactive (
 ) {
   // 创建 Dep 实例，这个下面的 Dep 上的 depend 会用到
    // 一个key 一个dep(),一一对应
+
   const dep = new Dep()
+  console.log('属性级 dep' + dep.id, obj, key);
+
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {

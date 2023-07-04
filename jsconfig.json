@@ -2,12 +2,16 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "core/*": ["./src/core/*"]
+      "core/*": ["./src/core/*"],
+      "shared/*": ["./src/shared/*"],
+      "compiler/*": ["./src/compiler/*"],
+      "sfc/*": ["./src/sfc/*"],
+      "server/*": ["./src/server/*"]
     },
     "target": "ES6",
     "module": "es6",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules"]
 }

@@ -12,28 +12,25 @@
 const vm = new Vue({
   el: "#app",
   data: {
-    key: "Vue！", // []
-    parentMessage: "Parent", // [
-    items: [{ message: "Foo" }, { message: "Bar" }], //  []
+    intro: "这是个例子", // []
+    parentMessage: "Parent", // []
+    items: [{ message: "Foo" }, { message: "Bar" }], //  [] 对象内部 []
     count: 0, //  []
     aaa: 123, // []
   },
   // bbb get set  []
   computed: {
     bbb() {
-      return this.count + this.key
-    }
+      return this.intro + this.count;
+    },
   },
   methods: {
     handleClick() {
-      for (let i = 0; i < 1000; i++) {
-        this.count++;
-      }
+      this.count++;
     },
-  },
-  mounted() {
-    console.dir(document.getElementById("app"));
   },
 });
 
-vm.$watch('count', ()=> {})
+vm.$watch("count", (newVal) => {
+  console.log(newVal);
+});
