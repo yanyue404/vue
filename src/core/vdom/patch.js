@@ -74,16 +74,31 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
+/**
+ * 工厂函数，注入平台特有的一些功能操作，并定义一些方法，然后返回 patch 函数
+ */
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
 
+  /**
+   * modules: { ref, directives, 平台特有的一些操纵，比如 attr、class、style 等 }
+   * nodeOps: { 对元素的增删改查 API }
+   */
   const { modules, nodeOps } = backend
-  // 引入DOM属性相关的生命周期钩子函数
+  /**
+   * hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+   * 遍历这些钩子，然后从 modules 的各个模块中找到相应的方法，比如：directives 中的 create、update、destroy 方法
+   * 让这些方法放到 cb[hook] = [hook 方法] 中，比如: cb.create = [fn1, fn2, ...]
+   * 然后在合适的时间调用相应的钩子方法完成对应的操作
+   */
+
   for (i = 0; i < hooks.length; ++i) {
+    // 比如 cbs.create = []
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
       if (isDef(modules[j][hooks[i]])) {
+        // 遍历各个 modules，找出各个 module 中的 create 方法，然后添加到 cbs.create 数组中
         cbs[hooks[i]].push(modules[j][hooks[i]])
       }
     }
@@ -323,6 +338,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 创建所有子节点，并将子节点插入父节点，形成一棵 DOM 树
+   */
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
       if (process.env.NODE_ENV !== 'production') {
@@ -343,7 +361,9 @@ export function createPatchFunction (backend) {
     }
     return isDef(vnode.tag)
   }
-
+  /**
+   * 调用 各个模块的 create 方法，比如创建属性的、创建样式的、指令的等等 ，然后执行组件的 mounted 生命周期方法
+   */
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
     for (let i = 0; i < cbs.create.length; ++i) {
       cbs.create[i](emptyNode, vnode)
@@ -380,12 +400,21 @@ export function createPatchFunction (backend) {
       nodeOps.setStyleScope(vnode.elm, i)
     }
   }
-
+  /**
+   * 在指定索引范围（startIdx —— endIdx）内添加节点
+   */
   function addVnodes (parentElm, refElm, vnodes, startIdx, endIdx, insertedVnodeQueue) {
     for (; startIdx <= endIdx; ++startIdx) {
       createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm, false, vnodes, startIdx)
     }
   }
+
+  /**
+   * 销毁节点：
+   *   执行组件的 destroy 钩子，即执行 $destroy 方法 
+   *   执行组件各个模块(style、class、directive 等）的 destroy 方法
+   *   如果 vnode 还存在子节点，则递归调用 invokeDestroyHook
+   */
 
   function invokeDestroyHook (vnode) {
     let i, j
@@ -573,6 +602,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+  * 在老节点（oldCh）中寻找到新节点（vnode）的位置索引 
+  */
   function findIdxInOld (node, oldCh, start, end) {
     for (let i = start; i < end; i++) {
       const c = oldCh[i]
@@ -580,6 +612,14 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 更新节点
+   *   全量的属性更新
+   *   如果新老节点都有孩子，则递归执行 diff
+   *   如果新节点有孩子，老节点没孩子，则新增新节点的这些孩子节点
+   *   如果老节点有孩子，新节点没孩子，则删除老节点的这些孩子
+   *   更新文本节点
+   */
   function patchVnode (
     oldVnode,
     vnode,
@@ -618,26 +658,31 @@ export function createPatchFunction (backend) {
       vnode.key === oldVnode.key &&
       (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
     ) {
+      // 新旧节点都是静态的而且两个节点的 key 一样，并且新节点被 clone 了 或者 新节点有 v-once指令，则重用这部分节点
       vnode.componentInstance = oldVnode.componentInstance
       return
     }
 
+    // 执行组件的 prepatch 钩子
     let i
     const data = vnode.data
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
 
+    // 老节点的孩子
     const oldCh = oldVnode.children
+    // 新节点的孩子
     const ch = vnode.children
+    // 全量更新新节点的属性
     if (isDef(data) && isPatchable(vnode)) {
       // 调用各个DOM属性相关的update钩子函数
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
 
-    // vnode 不是文本节点
     if (isUndef(vnode.text)) {
+      // vnode 不是文本节点
       if (isDef(oldCh) && isDef(ch)) {
         // ! 核心中的核心
         // 都有 children 且 children 不同，更新子节点
@@ -794,8 +839,10 @@ export function createPatchFunction (backend) {
     }
   }
 
-  // patch 函数用于将 VNode 变成真正的 DOM，渲染到页面上，这个过程涵盖了两种情况
-  // 第一种就是初次渲染，另一种就是响应式数据发生变化视图随之更新
+  // patch 函数用于将 VNode 变成真正的 DOM，渲染到页面上，这个过程涵盖了三种情况
+  // 第一种，页面销毁，新节点不存在，老节点存在，调用 destroy，销毁老节点
+  // 第二种就是初次渲染，创建新节点，并插入 body，然后移除老节点
+  // 另一种就是响应式数据发生变化视图随之更新, 执行 patchVnode
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     // 如果新节点不存在，老节点存在，调用 destroy 销毁老节点
     if (isUndef(vnode)) {

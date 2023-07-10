@@ -6,7 +6,8 @@
       "shared/*": ["./src/shared/*"],
       "compiler/*": ["./src/compiler/*"],
       "sfc/*": ["./src/sfc/*"],
-      "server/*": ["./src/server/*"]
+      "server/*": ["./src/server/*"],
+      "web/*": ["./src/platforms/web/*"]
     },
     "target": "ES6",
     "module": "es6",
