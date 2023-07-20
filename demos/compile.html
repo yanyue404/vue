@@ -29,6 +29,8 @@
 
       const qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
       const startTagOpen = new RegExp("^<" + qnameCapture);
+      // /> => /
+      // > => ''
       const startTagClose = /^\s*(\/?)>/;
 
       const endTag = new RegExp("^<\\/" + qnameCapture + "[^>]*>");
@@ -38,15 +40,18 @@
       const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/;
 
       const stack = [];
+      // * root 根标签节点
+      // * currentParent 当前标签的父标签节点
       let currentParent, root;
-
+      // 索引初始化
       let index = 0;
 
+      // 推进索引
       function advance(n) {
         index += n;
         html = html.substring(n);
       }
-
+      // 把 attr 转变成 map
       function makeAttrsMap(attrs) {
         const map = {};
         for (let i = 0, l = attrs.length; i < l; i++) {
@@ -55,6 +60,7 @@
         return map;
       }
 
+      // 处理开始标签
       function parseStartTag() {
         const start = html.match(startTagOpen);
         if (start) {
@@ -66,6 +72,7 @@
           advance(start[0].length);
 
           let end, attr;
+          // 取未闭合前的所有属性
           while (
             !(end = html.match(startTagClose)) &&
             (attr = html.match(attribute))
@@ -76,7 +83,9 @@
               value: attr[3],
             });
           }
+          // 取闭合后的
           if (end) {
+            // 结束标签的状态，是自闭合还是还有另一半
             match.unarySlash = end[1];
             advance(end[0].length);
             match.end = index;
@@ -85,6 +94,7 @@
         }
       }
 
+      // 处理结束标签
       function parseEndTag(tagName) {
         let pos;
         for (pos = stack.length - 1; pos >= 0; pos--) {
@@ -140,7 +150,7 @@
         }
         return val;
       }
-
+      // 处理 for
       function processFor(el) {
         let exp;
         if ((exp = getAndRemoveAttr(el, "v-for"))) {
@@ -150,6 +160,7 @@
         }
       }
 
+      // 处理 if
       function processIf(el) {
         const exp = getAndRemoveAttr(el, "v-if");
         if (exp) {
@@ -169,11 +180,13 @@
           let textEnd = html.indexOf("<");
           if (textEnd === 0) {
             const endTagMatch = html.match(endTag);
+            // 对尾标签的解析
             if (endTagMatch) {
               advance(endTagMatch[0].length);
               parseEndTag(endTagMatch[1]);
               continue;
             }
+            // 对开始标签的解析
             if (html.match(startTagOpen)) {
               const startTagMatch = parseStartTag();
               const element = {
@@ -189,14 +202,16 @@
               processIf(element);
               processFor(element);
 
+              // 根节点
               if (!root) {
                 root = element;
               }
-
+              // 有父节点这一轮得到的都是他的子元素
               if (currentParent) {
                 currentParent.children.push(element);
               }
 
+              // 如果不是自闭合的状态，还有另一半， unarySlash 为空字符串
               if (!startTagMatch.unarySlash) {
                 stack.push(element);
                 currentParent = element;
@@ -327,9 +342,9 @@
             const children = genChildren(el);
             let code;
             code = `_c('${el.tag},'{
-                staticClass: ${el.attrsMap && el.attrsMap[":class"]},
-                class: ${el.attrsMap && el.attrsMap["class"]},
-            }${children ? `,${children}` : ""})`;
+                      staticClass: ${el.attrsMap && el.attrsMap[":class"]},
+                      class: ${el.attrsMap && el.attrsMap["class"]},
+                  }${children ? `,${children}` : ""})`;
             return code;
           }
         }
@@ -340,13 +355,14 @@
         };
       }
 
-      //
+      // template 模板
       var html =
         '<div :class="c" class="demo" v-if="isShow"><span v-for="item in sz">{{item}}</span></div>';
 
       const ast = parse();
       optimize(ast);
       const code = generate(ast);
+      console.log("code", code);
     </script>
   </body>
 </html>

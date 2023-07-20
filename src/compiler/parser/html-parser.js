@@ -188,6 +188,7 @@ export function parseHTML (html, options) {
   // Clean up any remaining tags
   parseEndTag()
 
+  // 推进 index
   function advance (n) {
     index += n
     html = html.substring(n)
