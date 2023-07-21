@@ -19,6 +19,7 @@ export function installRenderHelpers (target: any) {
   target._s = toString
   // v-for
   target._l = renderList
+  // 插槽
   target._t = renderSlot
   target._q = looseEqual
   target._i = looseIndexOf

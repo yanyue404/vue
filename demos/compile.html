@@ -309,9 +309,10 @@
 
       function generate(rootAst) {
         function genIf(el) {
-          // if 条件
+          // 加工过
           el.ifProcessed = true;
           if (!el.ifConditions.length) {
+            // 空 vnode
             return "_e()";
           }
           return `(${el.ifConditions[0].exp})?${genElement(
@@ -324,6 +325,7 @@
 
           const exp = el.for;
           const alias = el.alias;
+          // 迭代器
           const iterator1 = el.iterator1 ? `,${el.iterator1}` : "";
           const iterator2 = el.iterator2 ? `,${el.iterator2}` : "";
 
