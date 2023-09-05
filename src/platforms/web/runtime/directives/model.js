@@ -34,6 +34,8 @@ const directive = {
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
+        // * 通过用一个标记lock来避免中文输入过程中触发过滤
+        // 利用compositionstart和compositionend可以知道中文输入什么时候开始和结束
         el.addEventListener('compositionstart', onCompositionStart)
         el.addEventListener('compositionend', onCompositionEnd)
         // Safari < 10.2 & UIWebView doesn't fire compositionend when
@@ -131,6 +133,7 @@ function onCompositionStart (e) {
   e.target.composing = true
 }
 
+// 当文本段落的组成完成或取消时，compositionend 事件将被触发 (具有特殊字符的触发，需要一系列键和其他输入，如语音识别或移动中的字词建议)。
 function onCompositionEnd (e) {
   // prevent triggering an input event for no reason
   if (!e.target.composing) return
