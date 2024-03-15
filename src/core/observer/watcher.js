@@ -190,7 +190,7 @@ export default class Watcher {
       this.dirty = true
     } else if (this.sync) {
       // 同步执行，在使用 vm.$watch 或者 watch 选项时可以传一个 sync 选项，
-      // 当为 true 时在数据更新时该 watcher 就不走异步更新队列，直接执行 this.run 
+      // 当为 true 时在数据更新时该 watcher 就不走异步更新队列，直接执行 this.run
       // 方法进行更新
       // 这个属性在官方文档中没有出现
       this.run()
@@ -242,6 +242,7 @@ export default class Watcher {
   /**
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
+   * 计算属性取值 lazy watcher 专用
    */
   evaluate () {
     this.value = this.get()
@@ -253,7 +254,7 @@ export default class Watcher {
    * Depend on all deps collected by this watcher.
    */
   depend () {
-    // deps 中保存了计算属性用到的所有 dep 实例，每个属性的 dep 实例中保存了它的所有依赖 
+    // deps 中保存了计算属性用到的所有 dep 实例，每个属性的 dep 实例中保存了它的所有依赖
     let i = this.deps.length
     while (i--) {
       this.deps[i].depend()

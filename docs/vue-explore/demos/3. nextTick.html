@@ -50,6 +50,7 @@
       let queue = [];
       let waiting = false;
 
+      // 清空调度器队列里的
       function flushSchedulerQueue() {
         let watcher, id;
 
@@ -67,7 +68,7 @@
         const id = watcher.id;
         if (has[id] == null) {
           has[id] = true;
-          queue.push(watcher);
+          queue.push(watcher); // 正在执行就放到 queue 队列，等下一次 tick
 
           if (!waiting) {
             waiting = true;

@@ -19,7 +19,7 @@ const activatedChildren: Array<Component> = []
 let has: { [key: number]: ?true } = {} // 维护已经收集过的 wacher id
 let circular: { [key: number]: number } = {}
 let waiting = false // 事件循环放行标志, 保证flushSchedulerQueue回调只允许被置入callbacks一次
-let flushing = false // queue 是否在执行  
+let flushing = false // queue 是否在执行
 let index = 0
 
 /**
@@ -67,14 +67,14 @@ if (inBrowser && !isIE) {
 
 /**
  * Flush both queues and run the watchers.
- * 执行所有的队列并执行 watchers
+ * 清空所有的队列并执行 watchers
  */
 function flushSchedulerQueue () {
   currentFlushTimestamp = getNow()
   flushing = true
   let watcher, id
 
-  // 给 queue 里面的 watcher 进行排序
+  // 给 queue 里面的 watcher按 id 降序进行排序
   // Sort queue before flush.
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
@@ -192,7 +192,7 @@ export function queueWatcher (watcher: Watcher) {
     // 下一次 tick 执行完才会清空
     if (!waiting) {
       waiting = true
-  
+
       if (process.env.NODE_ENV !== 'production' && !config.async) {
         // 直接刷新调度队列
         // 一般不会走这儿，Vue 默认是异步执行，如果改为同步执行，性能会大打折扣

@@ -1,8 +1,8 @@
 /* global Vue */
 
-// watcher(name: bbb, id: 1)
-// watcher(name: count, id: 2)
-// 渲染 watcher name: render id: 3
+// watcher(name: concat, id: 1)
+// 渲染 watcher name: render id: 2
+// watcher(name: count, id: 3)
 
 // new Wacther(()=> updateComponent(render()) )
 
@@ -13,14 +13,15 @@ const vm = new Vue({
   el: "#app",
   data: {
     intro: "这是个例子", // []
-    parentMessage: "Parent", // []
-    items: [{ message: "Foo" }, { message: "Bar" }], //  [] 对象内部 []
     count: 0, //  []
     aaa: 123, // []
   },
-  // bbb get set  []
+  // concat get set  []
   computed: {
-    bbb() {
+    ccc() {
+      return this.intro;
+    },
+    concat() {
       return this.intro + this.count;
     },
   },

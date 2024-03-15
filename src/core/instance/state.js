@@ -165,6 +165,7 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
+// 默认计算属性的 watcher 是 lazy 模式，懒执行
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
@@ -185,6 +186,7 @@ function initComputed (vm: Component, computed: Object) {
 
     if (!isSSR) {
       // create internal watcher for the computed property.
+      // 计算属性注册 watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -249,7 +251,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
-      // 将计算属性的 watcher 依次加入到这些 dep 实例的依赖列表中 
+      // 将计算属性的 watcher 依次加入到这些 dep 实例的依赖列表中 （把 getter 中读到的变量都收集一遍计算 watcher）
       if (Dep.target) {
         watcher.depend()
       }
